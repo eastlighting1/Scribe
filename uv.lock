@@ -222,6 +222,9 @@ wheels = [
 name = "scribe"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "spine" },
+]
 
 [package.optional-dependencies]
 dev = [
@@ -235,6 +238,20 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.15.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.0" },
+    { name = "spine", editable = "../Spine" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "spine"
+version = "0.1.0"
+source = { editable = "../Spine" }
+
+[package.metadata]
+requires-dist = [
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
 ]
 provides-extras = ["dev"]
 

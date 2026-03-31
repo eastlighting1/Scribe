@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from pathlib import Path
 import sys
 import tarfile
 import zipfile
-
+from pathlib import Path
 
 FORBIDDEN_SUBSTRINGS = (
     "__pycache__",
