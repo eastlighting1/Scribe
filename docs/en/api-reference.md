@@ -1,6 +1,6 @@
 # API Reference
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 This page is the reference companion to the rest of the Scribe guide. The other pages explain how
 to think about instrumentation, scope design, degraded capture, sinks, and artifact binding. This
@@ -14,18 +14,18 @@ objects? Which result, sink, and exception types are intended to be public? This
 organized around those questions.
 
 If you are still deciding whether a piece of data should be modeled as an event, metric, span, or
-artifact, start with [Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md).
+artifact, start with [Capture Patterns](capture-patterns.md).
 If you are trying to understand degraded outcomes or dispatch failures, read
-[Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+[Degradation and Errors](degradation-and-errors.md)
 alongside this page.
 
 ## Package Entry Point
 
 The top-level package exports are collected in
-[src/scribe/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/__init__.py). Public
+[src/scribe/__init__.py](../../src/scribe/__init__.py). Public
 submodule exports are collected in module-level `__init__.py` files such as
-[src/scribe/config/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/config/__init__.py)
-and [src/scribe/results/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/results/__init__.py).
+[src/scribe/config/__init__.py](../../src/scribe/config/__init__.py)
+and [src/scribe/results/__init__.py](../../src/scribe/results/__init__.py).
 Together, those files are the best definition of what the library treats as its supported import
 surface.
 
@@ -81,7 +81,7 @@ documented public symbol set through their `__init__.py` files.
 ## Session API
 
 The main SDK entry point lives in
-[src/scribe/api/session.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/api/session.py).
+[src/scribe/api/session.py](../../src/scribe/api/session.py).
 `Scribe` is the object you construct once for a project or process and then use to create
 run-scoped instrumentation.
 
@@ -100,7 +100,7 @@ Parameters:
 
 - `project_name`: logical project name attached to the session and its emitted payloads
 - `sinks`: optional sequence of sink instances
-- `config`: optional [`ScribeConfig`](C:/Users/eastl/MLObservability/Scribe/src/scribe/config/models.py)
+- `config`: optional [`ScribeConfig`](../../src/scribe/config/models.py)
 
 Typical usage:
 
@@ -348,7 +348,7 @@ Raises:
 ## Scope API
 
 The lifecycle scope types live in
-[src/scribe/runtime/scopes.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/scopes.py).
+[src/scribe/runtime/scopes.py](../../src/scribe/runtime/scopes.py).
 In day-to-day usage, these scope objects are the API surface most developers work with directly,
 because they make the lifecycle boundary explicit and keep instrumentation colocated with the work
 being performed.
@@ -503,7 +503,7 @@ session call relies on the currently active context.
 ## Configuration
 
 The runtime configuration model lives in
-[src/scribe/config/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/config/models.py)
+[src/scribe/config/models.py](../../src/scribe/config/models.py)
 and is imported from `scribe.config`.
 
 ### `scribe.config.ScribeConfig`
@@ -600,7 +600,7 @@ MetricEmission(
 ## Result Models
 
 The result models live in
-[src/scribe/results/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/results/models.py).
+[src/scribe/results/models.py](../../src/scribe/results/models.py).
 They are the main reason capture calls in Scribe feel different from plain logging calls. Instead of
 returning `None`, the SDK returns structured outcomes that explain what family was emitted, whether
 delivery succeeded, and whether any degradation occurred.
@@ -712,7 +712,7 @@ degraded batch result.
 ## Artifact Models
 
 The public artifact models live in
-[src/scribe/artifacts/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/models.py).
+[src/scribe/artifacts/models.py](../../src/scribe/artifacts/models.py).
 Most users do not instantiate all of them directly during normal instrumentation, because
 `register_artifact(...)` handles the common path. They are still part of the public surface because
 they define the binding model Scribe emits and they are useful in tests, extensions, and advanced
@@ -806,12 +806,12 @@ Important fields:
 
 If you are trying to understand when these fields degrade, or why artifact binding is modeled
 separately from events, see
-[Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md).
+[Artifacts](artifacts.md).
 
 ## Sink Types
 
 The built-in sinks are re-exported through
-[src/scribe/sinks/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/__init__.py).
+[src/scribe/sinks/__init__.py](../../src/scribe/sinks/__init__.py).
 These are the delivery boundary between Scribe's structured runtime model and actual persistence or
 inspection.
 
@@ -880,12 +880,12 @@ Returns:
 - `CompositeSink`
 
 For more operational detail about dispatch, family support, and local persistence layout, see
-[Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md).
+[Sinks and Storage](sinks-and-storage.md).
 
 ## Exceptions
 
 The public exception types live in
-[src/scribe/exceptions.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/exceptions.py). They
+[src/scribe/exceptions.py](../../src/scribe/exceptions.py). They
 divide Scribe failures into a small number of categories so that callers can distinguish invalid
 input, missing lifecycle state, closed scopes, and dispatch failure.
 
@@ -926,10 +926,10 @@ a way that left no successful sink path.
 
 ## Related Files
 
-- Package exports: [src/scribe/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/__init__.py)
-- SDK session API: [src/scribe/api/session.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/api/session.py)
-- Scope types: [src/scribe/runtime/scopes.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/scopes.py)
-- Runtime config: [src/scribe/config/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/config/models.py)
-- Result models: [src/scribe/results/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/results/models.py)
-- Artifact models: [src/scribe/artifacts/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/models.py)
-- Exceptions: [src/scribe/exceptions.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/exceptions.py)
+- Package exports: [src/scribe/__init__.py](../../src/scribe/__init__.py)
+- SDK session API: [src/scribe/api/session.py](../../src/scribe/api/session.py)
+- Scope types: [src/scribe/runtime/scopes.py](../../src/scribe/runtime/scopes.py)
+- Runtime config: [src/scribe/config/models.py](../../src/scribe/config/models.py)
+- Result models: [src/scribe/results/models.py](../../src/scribe/results/models.py)
+- Artifact models: [src/scribe/artifacts/models.py](../../src/scribe/artifacts/models.py)
+- Exceptions: [src/scribe/exceptions.py](../../src/scribe/exceptions.py)

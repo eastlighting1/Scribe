@@ -1,6 +1,6 @@
 # Artifacts
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 When teams first instrument `Scribe`, they often begin with events and metrics. Very quickly,
 however, another question appears:
@@ -109,7 +109,7 @@ output identity and capture-quality semantics.
 ## The Main Models Behind Artifact Capture
 
 The artifact models live in
-[`artifacts/models.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/models.py).
+[`artifacts/models.py`](../../src/scribe/artifacts/models.py).
 
 The most important ones are:
 
@@ -512,7 +512,7 @@ The artifact answers:
 ## A Realistic Artifact Flow
 
 The example workflow in
-[`artifact_binding_workflow.py`](C:/Users/eastl/MLObservability/Scribe/examples/artifact_binding_workflow.py)
+[`artifact_binding_workflow.py`](../../examples/artifact_binding_workflow.py)
 shows a good realistic pattern.
 
 The run:
@@ -651,16 +651,16 @@ plain file references.
 
 If this page made sense, the most useful next pages are usually:
 
-1. [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+1. [Degradation and Errors](degradation-and-errors.md)
    if you want to understand degraded artifact capture in more operational detail.
-2. [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md) if you
+2. [Sinks and Storage](sinks-and-storage.md) if you
    want to see where artifact bindings and degradation evidence are persisted.
-3. [Examples](C:/Users/eastl/MLObservability/Scribe/docs/en/examples.md) if you want to see
+3. [Examples](examples.md) if you want to see
    artifact registration inside full workflow examples.
 
 ## Related Files
 
-- Artifact models: [src/scribe/artifacts/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/models.py)
-- Artifact registration service: [src/scribe/artifacts/service.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/service.py)
-- Artifact binding example: [examples/artifact_binding_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/artifact_binding_workflow.py)
-- Artifact-related tests: [tests/test_scribe_mvp.py](C:/Users/eastl/MLObservability/Scribe/tests/test_scribe_mvp.py)
+- Artifact models: [src/scribe/artifacts/models.py](../../src/scribe/artifacts/models.py)
+- Artifact registration service: [src/scribe/artifacts/service.py](../../src/scribe/artifacts/service.py)
+- Artifact binding example: [examples/artifact_binding_workflow.py](../../examples/artifact_binding_workflow.py)
+- Artifact-related tests: [tests/test_scribe_mvp.py](../../tests/test_scribe_mvp.py)

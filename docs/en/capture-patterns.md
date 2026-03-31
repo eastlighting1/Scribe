@@ -1,6 +1,6 @@
 # Capture Patterns
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 When people start using `Scribe`, one of the first practical questions is usually not "what API
 exists," but "what kind of runtime fact should I capture with which primitive." This page exists to
@@ -594,18 +594,18 @@ scope where it naturally belongs."
 
 If this page made sense, the most useful next pages are usually:
 
-1. [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md) if you want deeper
+1. [Artifacts](artifacts.md) if you want deeper
    guidance on artifact registration and degraded bindings.
-2. [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md) if you
+2. [Sinks and Storage](sinks-and-storage.md) if you
    want to understand where captured payloads go.
-3. [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+3. [Degradation and Errors](degradation-and-errors.md)
    if you want to understand operational interpretation when capture is partial or sinks fail.
-4. [Examples](C:/Users/eastl/MLObservability/Scribe/docs/en/examples.md) if you want full workflow
+4. [Examples](examples.md) if you want full workflow
    examples rather than isolated patterns.
 
 ## Related Files
 
-- Scope APIs: [src/scribe/runtime/scopes.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/scopes.py)
-- Trace capture service: [src/scribe/traces/service.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/traces/service.py)
-- Artifact registration service: [src/scribe/artifacts/service.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/service.py)
-- Evaluation example: [examples/evaluation_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/evaluation_workflow.py)
+- Scope APIs: [src/scribe/runtime/scopes.py](../../src/scribe/runtime/scopes.py)
+- Trace capture service: [src/scribe/traces/service.py](../../src/scribe/traces/service.py)
+- Artifact registration service: [src/scribe/artifacts/service.py](../../src/scribe/artifacts/service.py)
+- Evaluation example: [examples/evaluation_workflow.py](../../examples/evaluation_workflow.py)

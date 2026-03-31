@@ -1,6 +1,6 @@
 # Core Concepts
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 When people first see `Scribe`, the first question is usually not "what fields exist," but "where
 in my workflow should I put this library, and what exactly will it capture for me." This page is
@@ -463,11 +463,11 @@ If this page explained "how the runtime is shaped," the next pages explain "how 
 right capture primitive" and "how that capture behaves operationally."
 
 - event, metric, span, and batch guidance:
-  [Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md)
+  [Capture Patterns](capture-patterns.md)
 - sink behavior and local inspection:
-  [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md)
+  [Sinks and Storage](sinks-and-storage.md)
 - reduced-fidelity capture and error interpretation:
-  [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+  [Degradation and Errors](degradation-and-errors.md)
 
 The most natural next page is usually
-[Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md).
+[Capture Patterns](capture-patterns.md).

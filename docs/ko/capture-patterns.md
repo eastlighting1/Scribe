@@ -1,6 +1,6 @@
 # 캡처 패턴
 
-[사용자 가이드 홈](C:/Users/eastl/MLObservability/Scribe/docs/ko/README.md)
+[사용자 가이드 홈](../USER_GUIDE.ko.md)
 
 사람들이 `Scribe`를 쓰기 시작하면, 가장 먼저 나오는 실전 질문은 대개 "어떤 API가
 있지?"가 아니라 "어떤 종류의 runtime fact를 어떤 primitive로 캡처해야 하지?"입니다.
@@ -600,18 +600,18 @@ scope에 배치하라."
 
 이 페이지가 이해됐다면, 다음 문서들이 보통 가장 유용합니다:
 
-1. [아티팩트](C:/Users/eastl/MLObservability/Scribe/docs/ko/artifacts.md):
+1. [아티팩트](artifacts.md):
    artifact registration과 degraded binding을 더 깊게 보고 싶을 때
-2. [싱크와 저장소](C:/Users/eastl/MLObservability/Scribe/docs/ko/sinks-and-storage.md):
+2. [싱크와 저장소](sinks-and-storage.md):
    캡처된 payload가 어디로 가는지 알고 싶을 때
-3. [Degradation과 오류](C:/Users/eastl/MLObservability/Scribe/docs/ko/degradation-and-errors.md):
+3. [Degradation과 오류](degradation-and-errors.md):
    capture가 부분적이거나 sink가 실패했을 때의 운영 해석을 알고 싶을 때
-4. [예제](C:/Users/eastl/MLObservability/Scribe/docs/ko/examples.md):
+4. [예제](examples.md):
    고립된 패턴보다 전체 워크플로 예제를 보고 싶을 때
 
 ## 관련 파일
 
-- Scope APIs: [src/scribe/runtime/scopes.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/scopes.py)
-- Trace capture service: [src/scribe/traces/service.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/traces/service.py)
-- Artifact registration service: [src/scribe/artifacts/service.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/service.py)
-- Evaluation example: [examples/evaluation_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/evaluation_workflow.py)
+- Scope APIs: [src/scribe/runtime/scopes.py](../../src/scribe/runtime/scopes.py)
+- Trace capture service: [src/scribe/traces/service.py](../../src/scribe/traces/service.py)
+- Artifact registration service: [src/scribe/artifacts/service.py](../../src/scribe/artifacts/service.py)
+- Evaluation example: [examples/evaluation_workflow.py](../../examples/evaluation_workflow.py)

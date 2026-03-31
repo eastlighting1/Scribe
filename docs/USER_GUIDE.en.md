@@ -4,29 +4,29 @@ Scribe documentation is organized so that a new user can answer "how do I add th
 real Python ML workflow" before diving into every API surface in detail. If this is your first
 time here, the fastest path is to read the pages below in order.
 
-- [Getting Started](C:/Users/eastl/MLObservability/Scribe/docs/en/getting-started.md)
-- [Core Concepts](C:/Users/eastl/MLObservability/Scribe/docs/en/core-concepts.md)
-- [Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md)
-- [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md)
-- [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md)
-- [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
-- [API Reference](C:/Users/eastl/MLObservability/Scribe/docs/en/api-reference.md)
-- [Examples](C:/Users/eastl/MLObservability/Scribe/docs/en/examples.md)
+- [Getting Started](en/getting-started.md)
+- [Core Concepts](en/core-concepts.md)
+- [Capture Patterns](en/capture-patterns.md)
+- [Sinks and Storage](en/sinks-and-storage.md)
+- [Artifacts](en/artifacts.md)
+- [Degradation and Errors](en/degradation-and-errors.md)
+- [API Reference](en/api-reference.md)
+- [Examples](en/examples.md)
 
 Recommended reading order:
 
 1. If you want to import `Scribe` right away and record your first event or metric, start with
-   [Getting Started](C:/Users/eastl/MLObservability/Scribe/docs/en/getting-started.md).
+   [Getting Started](en/getting-started.md).
 2. If you want to understand the mental model of `run -> stage -> operation` and the four payload
-   families, read [Core Concepts](C:/Users/eastl/MLObservability/Scribe/docs/en/core-concepts.md).
+   families, read [Core Concepts](en/core-concepts.md).
 3. If you want practical guidance on when to emit events, metrics, spans, and artifacts, read
-   [Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md) and
-   [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md).
+   [Capture Patterns](en/capture-patterns.md) and
+   [Artifacts](en/artifacts.md).
 4. If you want to understand local inspection, sink behavior, and degraded capture, read
-   [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md) and
-   [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md).
+   [Sinks and Storage](en/sinks-and-storage.md) and
+   [Degradation and Errors](en/degradation-and-errors.md).
 5. If you want to look up methods and result models quickly, use
-   [API Reference](C:/Users/eastl/MLObservability/Scribe/docs/en/api-reference.md).
+   [API Reference](en/api-reference.md).
 
 If you are new to `Scribe`, it is usually much more efficient to read `Getting Started`,
 `Core Concepts`, and `Degradation and Errors` first, then jump into type-specific or operational
@@ -89,9 +89,9 @@ This is intentional. In `Scribe`, most confusion comes not from "what fields exi
 
 If you only have a few minutes, read these three pages first:
 
-1. [Getting Started](C:/Users/eastl/MLObservability/Scribe/docs/en/getting-started.md)
-2. [Core Concepts](C:/Users/eastl/MLObservability/Scribe/docs/en/core-concepts.md)
-3. [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+1. [Getting Started](en/getting-started.md)
+2. [Core Concepts](en/core-concepts.md)
+3. [Degradation and Errors](en/degradation-and-errors.md)
 
 Those three pages are enough to understand:
 
@@ -112,10 +112,9 @@ happen when capture succeeds or degrades, the relevant place is `Scribe`.
 
 ## Related Files
 
-- English docs home: [docs/en/README.md](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
-- Korean user guide entry: [docs/USER_GUIDE.ko.md](C:/Users/eastl/MLObservability/Scribe/docs/USER_GUIDE.ko.md)
-- Package entrypoint: [src/scribe/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/__init__.py)
-- Public session API: [src/scribe/api/session.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/api/session.py)
-- Training example: [examples/training_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/training_workflow.py)
-- Evaluation example: [examples/evaluation_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/evaluation_workflow.py)
-- Artifact binding example: [examples/artifact_binding_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/artifact_binding_workflow.py)
+- Korean user guide entry: [docs/USER_GUIDE.ko.md](USER_GUIDE.ko.md)
+- Package entrypoint: [src/scribe/__init__.py](../src/scribe/__init__.py)
+- Public session API: [src/scribe/api/session.py](../src/scribe/api/session.py)
+- Training example: [examples/training_workflow.py](../examples/training_workflow.py)
+- Evaluation example: [examples/evaluation_workflow.py](../examples/evaluation_workflow.py)
+- Artifact binding example: [examples/artifact_binding_workflow.py](../examples/artifact_binding_workflow.py)

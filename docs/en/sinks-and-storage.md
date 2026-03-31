@@ -1,6 +1,6 @@
 # Sinks and Storage
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 Once `Scribe` starts capturing runtime truth, one question appears immediately:
 
@@ -102,7 +102,7 @@ payload by its family, and let each sink declare what it supports."
 
 The sink interface is intentionally small.
 
-The core abstract type is [`Sink`](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/base.py).
+The core abstract type is [`Sink`](../../src/scribe/sinks/base.py).
 
 At a high level, a sink provides:
 
@@ -131,7 +131,7 @@ Internally, `Scribe` dispatches payloads through family-specific helpers such as
 - `dispatch_degradation(...)`
 
 Those all funnel into the common dispatch path implemented in
-[`runtime/dispatch.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/dispatch.py).
+[`runtime/dispatch.py`](../../src/scribe/runtime/dispatch.py).
 
 That dispatch logic does several things in one pass:
 
@@ -187,7 +187,7 @@ These are not redundant with one another. They serve different usage situations.
 `LocalJsonlSink` is the most important built-in sink for first-time and local-first usage.
 
 Its implementation lives in
-[`adapters/local/jsonl.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/adapters/local/jsonl.py).
+[`adapters/local/jsonl.py`](../../src/scribe/adapters/local/jsonl.py).
 
 The reason this sink matters so much is that it gives `Scribe` a durable local path without
 requiring any external infrastructure. That makes it ideal for:
@@ -250,7 +250,7 @@ comes from the payloads `Scribe` created before the sink received them.
 `InMemorySink` is a very different kind of sink.
 
 Its implementation lives in
-[`sinks/memory.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/memory.py).
+[`sinks/memory.py`](../../src/scribe/sinks/memory.py).
 
 This sink stores actions in memory as tuples of:
 
@@ -278,7 +278,7 @@ Examples of good fit:
 `CompositeSink` exists for a different reason again.
 
 Its implementation lives in
-[`sinks/composite.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/composite.py).
+[`sinks/composite.py`](../../src/scribe/sinks/composite.py).
 
 This sink forwards incoming payloads to multiple child sinks. In effect, it acts like a grouped
 sink that combines child support sets.
@@ -580,17 +580,17 @@ capture path.
 
 If this page made sense, the most useful next pages are usually:
 
-1. [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+1. [Degradation and Errors](degradation-and-errors.md)
    if you want a deeper understanding of how sink failures and reduced fidelity are reported.
-2. [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md) if you want to
+2. [Artifacts](artifacts.md) if you want to
    understand a family where degraded capture is especially common in practice.
-3. [Examples](C:/Users/eastl/MLObservability/Scribe/docs/en/examples.md) if you want to see sink
+3. [Examples](examples.md) if you want to see sink
    usage inside larger end-to-end flows.
 
 ## Related Files
 
-- Sink interface: [src/scribe/sinks/base.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/base.py)
-- Composite sink: [src/scribe/sinks/composite.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/composite.py)
-- In-memory sink: [src/scribe/sinks/memory.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/memory.py)
-- Local JSONL sink: [src/scribe/adapters/local/jsonl.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/adapters/local/jsonl.py)
-- Dispatch logic: [src/scribe/runtime/dispatch.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/dispatch.py)
+- Sink interface: [src/scribe/sinks/base.py](../../src/scribe/sinks/base.py)
+- Composite sink: [src/scribe/sinks/composite.py](../../src/scribe/sinks/composite.py)
+- In-memory sink: [src/scribe/sinks/memory.py](../../src/scribe/sinks/memory.py)
+- Local JSONL sink: [src/scribe/adapters/local/jsonl.py](../../src/scribe/adapters/local/jsonl.py)
+- Dispatch logic: [src/scribe/runtime/dispatch.py](../../src/scribe/runtime/dispatch.py)

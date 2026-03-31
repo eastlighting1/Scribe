@@ -9,7 +9,7 @@
   [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](./pyproject.toml)
   [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-  [**Docs (EN)**](./docs/en/README.md) · [**Docs (KO)**](./docs/ko/README.md)
+  [**Docs (EN)**](./docs/USER_GUIDE.en.md) · [**Docs (KO)**](./docs/USER_GUIDE.ko.md)
 </div>
 
 ---
@@ -188,7 +188,7 @@ Dive deeper into Scribe's runtime model, capture patterns, sink behavior, and AP
 
 | Guide | English | Korean |
 |---|---|---|
-| **Main Guide** | [README.md](./docs/en/README.md) | [README.md](./docs/ko/README.md) |
+| **Main Guide** | [README.md](./docs/USER_GUIDE.en.md) | [README.md](./docs/USER_GUIDE.ko.md) |
 | **API Reference** | [api-reference.md](./docs/en/api-reference.md) | [api-reference.md](./docs/ko/api-reference.md) |
 
 **Recommended Reading Path:**

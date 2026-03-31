@@ -1,6 +1,6 @@
 # Examples
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 One of the fastest ways to understand `Scribe` is to see how a few small workflows assemble scope,
 capture primitives, artifact registration, and local storage together. This page explains the
@@ -40,9 +40,9 @@ that combined flow feels like without forcing you into a large codebase first.
 
 The repository currently includes these example files:
 
-- [Training workflow](C:/Users/eastl/MLObservability/Scribe/examples/training_workflow.py)
-- [Evaluation workflow](C:/Users/eastl/MLObservability/Scribe/examples/evaluation_workflow.py)
-- [Artifact binding workflow](C:/Users/eastl/MLObservability/Scribe/examples/artifact_binding_workflow.py)
+- [Training workflow](../../examples/training_workflow.py)
+- [Evaluation workflow](../../examples/evaluation_workflow.py)
+- [Artifact binding workflow](../../examples/artifact_binding_workflow.py)
 
 These examples are intentionally small. Their job is not to simulate a full production system. Their
 job is to make the core instrumentation patterns easy to see.
@@ -51,9 +51,9 @@ job is to make the core instrumentation patterns easy to see.
 
 The most useful reading order is:
 
-1. [Training workflow](C:/Users/eastl/MLObservability/Scribe/examples/training_workflow.py)
-2. [Evaluation workflow](C:/Users/eastl/MLObservability/Scribe/examples/evaluation_workflow.py)
-3. [Artifact binding workflow](C:/Users/eastl/MLObservability/Scribe/examples/artifact_binding_workflow.py)
+1. [Training workflow](../../examples/training_workflow.py)
+2. [Evaluation workflow](../../examples/evaluation_workflow.py)
+3. [Artifact binding workflow](../../examples/artifact_binding_workflow.py)
 
 That order is not arbitrary.
 
@@ -65,7 +65,7 @@ binding under imperfect conditions.
 
 File:
 
-- [examples/training_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/training_workflow.py)
+- [examples/training_workflow.py](../../examples/training_workflow.py)
 
 This is the best first example because it shows the most complete cross-section of normal `Scribe`
 usage in one place.
@@ -164,16 +164,16 @@ artifact capture can stay useful even when output materialization is partial.
 
 The training example connects most strongly to:
 
-- [Getting Started](C:/Users/eastl/MLObservability/Scribe/docs/en/getting-started.md)
-- [Core Concepts](C:/Users/eastl/MLObservability/Scribe/docs/en/core-concepts.md)
-- [Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md)
-- [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md)
+- [Getting Started](getting-started.md)
+- [Core Concepts](core-concepts.md)
+- [Capture Patterns](capture-patterns.md)
+- [Artifacts](artifacts.md)
 
 ## Example 2: Evaluation Workflow
 
 File:
 
-- [examples/evaluation_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/evaluation_workflow.py)
+- [examples/evaluation_workflow.py](../../examples/evaluation_workflow.py)
 
 This example is narrower than the training workflow, and that is exactly why it is useful.
 
@@ -259,15 +259,15 @@ That makes it especially useful for teams instrumenting:
 
 This example connects most strongly to:
 
-- [Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md)
-- [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md)
-- [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+- [Capture Patterns](capture-patterns.md)
+- [Artifacts](artifacts.md)
+- [Degradation and Errors](degradation-and-errors.md)
 
 ## Example 3: Artifact Binding Workflow
 
 File:
 
-- [examples/artifact_binding_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/artifact_binding_workflow.py)
+- [examples/artifact_binding_workflow.py](../../examples/artifact_binding_workflow.py)
 
 This is the most specialized example in the set, and it exists for a good reason. Artifact binding
 is one of the most distinctive parts of `Scribe`, and it benefits from being shown in isolation.
@@ -338,9 +338,9 @@ as separate but complementary records.
 
 This example connects most strongly to:
 
-- [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md)
-- [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
-- [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md)
+- [Artifacts](artifacts.md)
+- [Degradation and Errors](degradation-and-errors.md)
+- [Sinks and Storage](sinks-and-storage.md)
 
 ## How To Use The Examples Well
 
@@ -461,15 +461,15 @@ individual methods look in isolation.
 
 If this page made sense, the most useful next pages are usually:
 
-1. [API Reference](C:/Users/eastl/MLObservability/Scribe/docs/en/api-reference.md) if you want a
+1. [API Reference](api-reference.md) if you want a
    compact lookup while reading or adapting the examples.
-2. [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md) if the artifact-centric
+2. [Artifacts](artifacts.md) if the artifact-centric
    example raised new questions.
-3. [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md) if you
+3. [Sinks and Storage](sinks-and-storage.md) if you
    want to inspect the example output more deeply.
 
 ## Related Files
 
-- Training example: [examples/training_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/training_workflow.py)
-- Evaluation example: [examples/evaluation_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/evaluation_workflow.py)
-- Artifact binding example: [examples/artifact_binding_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/artifact_binding_workflow.py)
+- Training example: [examples/training_workflow.py](../../examples/training_workflow.py)
+- Evaluation example: [examples/evaluation_workflow.py](../../examples/evaluation_workflow.py)
+- Artifact binding example: [examples/artifact_binding_workflow.py](../../examples/artifact_binding_workflow.py)

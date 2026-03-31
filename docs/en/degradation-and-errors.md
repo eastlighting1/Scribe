@@ -1,6 +1,6 @@
 # Degradation and Errors
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 One of the most important parts of understanding `Scribe` is learning how it talks about things
 going wrong.
@@ -72,7 +72,7 @@ At the top level, most single capture calls produce one of three outcomes:
 - `failure`
 
 These are represented through `DeliveryStatus` in
-[`results/models.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/results/models.py).
+[`results/models.py`](../../src/scribe/results/models.py).
 
 ### `success`
 
@@ -240,7 +240,7 @@ Understanding that split makes debugging much faster.
 ## Sink-Side Degradation
 
 The dispatch path in
-[`runtime/dispatch.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/dispatch.py)
+[`runtime/dispatch.py`](../../src/scribe/runtime/dispatch.py)
 is the main place where sink-related degradation is created.
 
 Typical sink-side degraded cases:
@@ -293,7 +293,7 @@ Some degraded states originate earlier during payload-specific capture logic.
 Artifact registration is the clearest example.
 
 The artifact service in
-[`artifacts/service.py`](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/service.py)
+[`artifacts/service.py`](../../src/scribe/artifacts/service.py)
 can attach degradation reasons before dispatch even begins.
 
 Examples:
@@ -585,17 +585,17 @@ together with complete failure.
 
 If this page made sense, the most useful next pages are usually:
 
-1. [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md) if you
+1. [Sinks and Storage](sinks-and-storage.md) if you
    want to understand where degraded evidence and deliveries come from.
-2. [Artifacts](C:/Users/eastl/MLObservability/Scribe/docs/en/artifacts.md) if you want to see the
+2. [Artifacts](artifacts.md) if you want to see the
    most common practical source of degraded capture.
-3. [API Reference](C:/Users/eastl/MLObservability/Scribe/docs/en/api-reference.md) if you want a
+3. [API Reference](api-reference.md) if you want a
    compact lookup of result models and exception types.
 
 ## Related Files
 
-- Exceptions: [src/scribe/exceptions.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/exceptions.py)
-- Result models: [src/scribe/results/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/results/models.py)
-- Dispatch logic: [src/scribe/runtime/dispatch.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/dispatch.py)
-- Artifact service: [src/scribe/artifacts/service.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/artifacts/service.py)
-- Runtime session: [src/scribe/runtime/session.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/runtime/session.py)
+- Exceptions: [src/scribe/exceptions.py](../../src/scribe/exceptions.py)
+- Result models: [src/scribe/results/models.py](../../src/scribe/results/models.py)
+- Dispatch logic: [src/scribe/runtime/dispatch.py](../../src/scribe/runtime/dispatch.py)
+- Artifact service: [src/scribe/artifacts/service.py](../../src/scribe/artifacts/service.py)
+- Runtime session: [src/scribe/runtime/session.py](../../src/scribe/runtime/session.py)

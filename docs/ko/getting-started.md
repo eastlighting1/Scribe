@@ -1,6 +1,6 @@
 # 시작하기
 
-[사용자 가이드 홈](C:/Users/eastl/MLObservability/Scribe/docs/ko/README.md)
+[사용자 가이드 홈](../USER_GUIDE.ko.md)
 
 이 페이지는 처음 `Scribe`를 쓰는 사람에게 가장 실용적인 출발점입니다. 목표는 네
 가지입니다:
@@ -372,18 +372,18 @@ with scribe.run("training") as run:
 
 이 페이지가 이해됐다면, 다음 문서들이 보통 가장 유용합니다:
 
-1. [핵심 개념](C:/Users/eastl/MLObservability/Scribe/docs/ko/core-concepts.md):
+1. [핵심 개념](core-concepts.md):
    scope, payload family, result type의 mental model이 필요할 때
-2. [캡처 패턴](C:/Users/eastl/MLObservability/Scribe/docs/ko/capture-patterns.md):
+2. [캡처 패턴](capture-patterns.md):
    event, metric, span, batch API를 언제 써야 하는지 실전 가이드가 필요할 때
-3. [싱크와 저장소](C:/Users/eastl/MLObservability/Scribe/docs/ko/sinks-and-storage.md):
+3. [싱크와 저장소](sinks-and-storage.md):
    로컬 JSONL 출력과 sink 동작을 이해하고 싶을 때
-4. [Degradation과 오류](C:/Users/eastl/MLObservability/Scribe/docs/ko/degradation-and-errors.md):
+4. [Degradation과 오류](degradation-and-errors.md):
    reduced-fidelity capture와 운영 실패 모드를 이해하고 싶을 때
 
 ## 관련 파일
 
-- Public SDK entrypoint: [src/scribe/api/session.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/api/session.py)
-- Result models: [src/scribe/results/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/results/models.py)
-- Built-in sinks: [src/scribe/sinks/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/__init__.py)
-- Training example: [examples/training_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/training_workflow.py)
+- Public SDK entrypoint: [src/scribe/api/session.py](../../src/scribe/api/session.py)
+- Result models: [src/scribe/results/models.py](../../src/scribe/results/models.py)
+- Built-in sinks: [src/scribe/sinks/__init__.py](../../src/scribe/sinks/__init__.py)
+- Training example: [examples/training_workflow.py](../../examples/training_workflow.py)

@@ -1,6 +1,6 @@
 # Getting Started
 
-[User Guide Home](C:/Users/eastl/MLObservability/Scribe/docs/en/README.md)
+[User Guide Home](../USER_GUIDE.en.md)
 
 This page is the most practical starting point for a first-time `Scribe` user. Its goals are four
 things:
@@ -369,18 +369,18 @@ adding more scope or complexity."
 
 If this page made sense, the next useful pages are usually:
 
-1. [Core Concepts](C:/Users/eastl/MLObservability/Scribe/docs/en/core-concepts.md) if you want the
+1. [Core Concepts](core-concepts.md) if you want the
    mental model of scopes, payload families, and result types.
-2. [Capture Patterns](C:/Users/eastl/MLObservability/Scribe/docs/en/capture-patterns.md) if you
+2. [Capture Patterns](capture-patterns.md) if you
    want practical guidance on when to use events, metrics, spans, and batch APIs.
-3. [Sinks and Storage](C:/Users/eastl/MLObservability/Scribe/docs/en/sinks-and-storage.md) if you
+3. [Sinks and Storage](sinks-and-storage.md) if you
    want to understand local JSONL output and sink behavior.
-4. [Degradation and Errors](C:/Users/eastl/MLObservability/Scribe/docs/en/degradation-and-errors.md)
+4. [Degradation and Errors](degradation-and-errors.md)
    if you want to understand reduced-fidelity capture and operational failure modes.
 
 ## Related Files
 
-- Public SDK entrypoint: [src/scribe/api/session.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/api/session.py)
-- Result models: [src/scribe/results/models.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/results/models.py)
-- Built-in sinks: [src/scribe/sinks/__init__.py](C:/Users/eastl/MLObservability/Scribe/src/scribe/sinks/__init__.py)
-- Training example: [examples/training_workflow.py](C:/Users/eastl/MLObservability/Scribe/examples/training_workflow.py)
+- Public SDK entrypoint: [src/scribe/api/session.py](../../src/scribe/api/session.py)
+- Result models: [src/scribe/results/models.py](../../src/scribe/results/models.py)
+- Built-in sinks: [src/scribe/sinks/__init__.py](../../src/scribe/sinks/__init__.py)
+- Training example: [examples/training_workflow.py](../../examples/training_workflow.py)
