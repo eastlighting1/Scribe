@@ -2,10 +2,10 @@
   <h1>🖋 Scribe</h1>
   <p><em>A Local-First Capture SDK for ML Observability Workflows</em></p>
 
-  [![CI](https://github.com/eastlighting1/Scribe/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_OWNER/YOUR_REPO/actions/workflows/ci.yml)
-  [![Repository Policy](https://github.com/eastlighting1/Scribe/actions/workflows/repository-policy.yml/badge.svg)](https://github.com/YOUR_GITHUB_OWNER/YOUR_REPO/actions/workflows/repository-policy.yml)
-  [![Dependency Audit](https://github.com/eastlighting1/Scribe/actions/workflows/dependency-audit.yml/badge.svg)](https://github.com/YOUR_GITHUB_OWNER/YOUR_REPO/actions/workflows/dependency-audit.yml)
-  [![Build Inspection](https://github.com/eastlighting1/Scribe/actions/workflows/build-inspection.yml/badge.svg)](https://github.com/YOUR_GITHUB_OWNER/YOUR_REPO/actions/workflows/build-inspection.yml)
+  [![CI](https://github.com/eastlighting1/Scribe/actions/workflows/ci.yml/badge.svg)](https://github.com/eastlighting1/Scribe/actions/workflows/ci.yml)
+  [![Repository Policy](https://github.com/eastlighting1/Scribe/actions/workflows/repository-policy.yml/badge.svg)](https://github.com/eastlighting1/Scribe/actions/workflows/repository-policy.yml)
+  [![Dependency Audit](https://github.com/eastlighting1/Scribe/actions/workflows/dependency-audit.yml/badge.svg)](https://github.com/eastlighting1/Scribe/actions/workflows/dependency-audit.yml)
+  [![Build Inspection](https://github.com/eastlighting1/Scribe/actions/workflows/build-inspection.yml/badge.svg)](https://github.com/eastlighting1/Scribe/actions/workflows/build-inspection.yml)
   [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](./pyproject.toml)
   [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
