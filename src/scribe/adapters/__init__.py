@@ -1,0 +1,1 @@
+"""Default adapter implementations."""

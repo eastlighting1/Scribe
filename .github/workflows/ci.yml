@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+jobs:
+  lint-type-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Scribe
+        uses: actions/checkout@v4
+
+      - name: Check out Spine
+        uses: actions/checkout@v4
+        with:
+          repository: eastlighting1/Spine
+          path: Spine
+
+      - name: Prepare sibling Spine path
+        run: ln -s "$GITHUB_WORKSPACE/Spine" ../Spine
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync dependencies
+        run: uv sync --extra dev
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      - name: Mypy
+        run: uv run mypy src tests
+
+      - name: Pytest
+        run: uv run pytest tests
+
+      - name: Run training example
+        run: uv run python examples/training_workflow.py
+
+      - name: Run evaluation example
+        run: uv run python examples/evaluation_workflow.py
+
+      - name: Run artifact binding example
+        run: uv run python examples/artifact_binding_workflow.py

@@ -1,0 +1,40 @@
+name: Build Inspection
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+jobs:
+  build-and-inspect:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Scribe
+        uses: actions/checkout@v4
+
+      - name: Check out Spine
+        uses: actions/checkout@v4
+        with:
+          repository: eastlighting1/Spine
+          path: Spine
+
+      - name: Prepare sibling Spine path
+        run: ln -s "$GITHUB_WORKSPACE/Spine" ../Spine
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync dependencies
+        run: uv sync --extra dev
+
+      - name: Build wheel and sdist
+        run: uv run --with build python -m build
+
+      - name: Inspect built artifacts
+        run: uv run python scripts/check_build_artifacts.py dist

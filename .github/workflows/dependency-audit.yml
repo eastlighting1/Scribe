@@ -1,0 +1,37 @@
+name: Dependency Audit
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Scribe
+        uses: actions/checkout@v4
+
+      - name: Check out Spine
+        uses: actions/checkout@v4
+        with:
+          repository: eastlighting1/Spine
+          path: Spine
+
+      - name: Prepare sibling Spine path
+        run: ln -s "$GITHUB_WORKSPACE/Spine" ../Spine
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync dependencies
+        run: uv sync --extra dev
+
+      - name: Run pip-audit
+        run: uv run --with pip-audit pip-audit

@@ -1,0 +1,88 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scribe"
+version = "0.1.0"
+description = "Local-first Python capture SDK for structured ML observability and artifact-aware runtime instrumentation."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [
+  { name = "MLObservability" }
+]
+keywords = [
+  "ml",
+  "machine-learning",
+  "observability",
+  "instrumentation",
+  "artifacts",
+  "tracing",
+  "metrics",
+  "events",
+  "local-first",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: Other/Proprietary License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Monitoring",
+  "Typing :: Typed",
+]
+dependencies = [
+  "spine>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "ruff>=0.11.0",
+  "mypy>=1.15.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scribe"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/README.md",
+  "/pyproject.toml",
+  "/src/scribe",
+  "/tests",
+  "/examples",
+  "/docs",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["scribe"]
+
+[[tool.mypy.overrides]]
+module = ["spine.api", "spine.models", "spine.*"]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+
+[tool.uv.sources]
+spine = { path = "../Spine", editable = true }
