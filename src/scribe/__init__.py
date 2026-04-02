@@ -1,5 +1,8 @@
 """Public package exports for Scribe."""
 
+from scribe.adapters.kafka.producer import KafkaSink
+from scribe.adapters.local.jsonl import LocalJsonlSink
+from scribe.adapters.s3.json_objects import S3ObjectSink
 from scribe.api import Scribe
 from scribe.artifacts import (
     ArtifactBinding,
@@ -21,9 +24,6 @@ from scribe.metrics import MetricEmission
 from scribe.replay import ReplayBatchResult, ReplayEntryResult, replay_cli_main, replay_outbox
 from scribe.results import BatchCaptureResult, CaptureResult, DeliveryStatus, PayloadFamily
 from scribe.sinks import CompositeSink, InMemorySink, Sink
-from scribe.adapters.kafka.producer import KafkaSink
-from scribe.adapters.local.jsonl import LocalJsonlSink
-from scribe.adapters.s3.json_objects import S3ObjectSink
 
 __all__ = [
     "ArtifactBinding",

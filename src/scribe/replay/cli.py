@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Sequence
-from typing import Any
 
 from scribe.adapters.kafka import KafkaSink
 from scribe.adapters.local.jsonl import LocalJsonlSink
@@ -66,7 +65,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(
         f"replayed={result.total_count} "
         f"succeeded={result.success_count} "
-        f"skipped={result.skipped_count} "
+        f"skipped={result.skipped_total} "
         f"failed={result.failure_count}"
     )
     return 0 if result.failure_count == 0 else 1

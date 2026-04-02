@@ -10,11 +10,11 @@ from typing import TYPE_CHECKING, Any
 
 from scribe.exceptions import ValidationError
 from scribe.spine_bridge import (
+    METRIC_AGGREGATION_SCOPES,
     ArtifactManifest,
     CorrelationRefs,
     EnvironmentSnapshot,
     ExtensionFieldSet,
-    METRIC_AGGREGATION_SCOPES,
     MetricPayload,
     MetricRecord,
     OperationContext,

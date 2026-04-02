@@ -110,13 +110,22 @@ def _dispatch(
                 break
             except Exception as exc:
                 last_exc = exc
-                if attempt <= runtime.config.retry_attempts and runtime.config.retry_backoff_seconds > 0:
+                should_backoff = (
+                    attempt <= runtime.config.retry_attempts
+                    and runtime.config.retry_backoff_seconds > 0
+                )
+                if should_backoff:
                     time.sleep(runtime.config.retry_backoff_seconds * (2 ** (attempt - 1)))
             else:
                 last_exc = None
                 break
 
-        if deliveries and deliveries[-1].sink_name == sink.name and deliveries[-1].status == DeliveryStatus.DEGRADED:
+        latest_delivery_is_partial = (
+            deliveries
+            and deliveries[-1].sink_name == sink.name
+            and deliveries[-1].status == DeliveryStatus.DEGRADED
+        )
+        if latest_delivery_is_partial:
             continue
 
         if last_exc is not None:
@@ -131,7 +140,8 @@ def _dispatch(
             )
             reasons.append(f"sink_failure:{sink.name}")
             warning_messages.append(
-                f"Sink `{sink.name}` failed during `{family}` capture after {attempts} attempt(s): {last_exc}"
+                f"Sink `{sink.name}` failed during `{family}` capture "
+                f"after {attempts} attempt(s): {last_exc}"
             )
             failed_captures.append((sink.name, str(last_exc), attempts))
         else:
@@ -166,14 +176,16 @@ def _dispatch(
                 )
             except Exception as exc:
                 warning_messages.append(
-                    f"Failed to persist `{family}` payload for sink `{sink_name}` to the outbox: {exc}"
+                    f"Failed to persist `{family}` payload for sink "
+                    f"`{sink_name}` to the outbox: {exc}"
                 )
             else:
                 recovered_to_outbox = True
                 replay_refs.append(replay_ref)
                 reasons.append(f"durably_queued_for_replay:{sink_name}")
                 warning_messages.append(
-                    f"Failed `{family}` payload for sink `{sink_name}` was queued to the outbox as `{replay_ref}`."
+                    f"Failed `{family}` payload for sink `{sink_name}` "
+                    f"was queued to the outbox as `{replay_ref}`."
                 )
 
     if status == DeliveryStatus.FAILURE and recovered_to_outbox:

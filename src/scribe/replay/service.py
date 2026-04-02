@@ -45,7 +45,7 @@ class ReplayBatchResult:
         return sum(result.status == DeliveryStatus.FAILURE for result in self.results)
 
     @property
-    def skipped_count(self) -> int:
+    def skipped_total(self) -> int:
         return sum(result.status == DeliveryStatus.SKIPPED for result in self.results)
 
 

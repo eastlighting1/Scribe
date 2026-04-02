@@ -68,7 +68,7 @@ def test_replay_outbox_leaves_failed_entries_pending(tmp_path) -> None:
     replay_result = replay_outbox(outbox_root=str(outbox_root), sinks=[AlwaysFailSink()])
 
     assert replay_result.failure_count >= 1
-    assert replay_result.skipped_count == 0
+    assert replay_result.skipped_total == 0
     assert any(result.status == DeliveryStatus.FAILURE for result in replay_result.results)
     outbox = LocalOutbox(outbox_root)
     assert len(outbox.read_pending_entries()) >= 1

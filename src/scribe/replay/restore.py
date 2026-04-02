@@ -12,6 +12,7 @@ from scribe.artifacts.models import (
     ArtifactSourceKind,
     ArtifactVerificationPolicy,
 )
+from scribe.exceptions import ValidationError
 from scribe.spine_bridge import (
     ArtifactManifest,
     CorrelationRefs,
@@ -29,6 +30,15 @@ from scribe.spine_bridge import (
     StructuredEventRecord,
     TraceSpanPayload,
     TraceSpanRecord,
+    validate_artifact_manifest,
+    validate_environment_snapshot,
+    validate_metric_record,
+    validate_operation_context,
+    validate_project,
+    validate_run,
+    validate_stage_execution,
+    validate_structured_event_record,
+    validate_trace_span_record,
 )
 
 
@@ -254,10 +264,34 @@ _RESTORERS: dict[str, Any] = {
     "ArtifactManifest": _artifact_manifest,
 }
 
+_VALIDATORS: dict[str, Any] = {
+    "Project": validate_project,
+    "Run": validate_run,
+    "StageExecution": validate_stage_execution,
+    "OperationContext": validate_operation_context,
+    "EnvironmentSnapshot": validate_environment_snapshot,
+    "StructuredEventRecord": validate_structured_event_record,
+    "MetricRecord": validate_metric_record,
+    "TraceSpanRecord": validate_trace_span_record,
+    "ArtifactManifest": validate_artifact_manifest,
+}
+
+
+def _ensure_compatible(value: Any, validator: Any, label: str) -> Any:
+    report = validator(value)
+    if report.valid:
+        return value
+    issues = ", ".join(f"{issue.path}: {issue.message}" for issue in report.issues)
+    raise ValidationError(f"Restored {label} is incompatible: {issues}")
+
 
 def restore_payload(payload_type: str, payload: dict[str, Any]) -> Any:
     """Restore a typed payload object from a json-ready outbox payload."""
     restorer = _RESTORERS.get(payload_type)
     if restorer is None:
         return payload
-    return restorer(payload)
+    restored = restorer(payload)
+    validator = _VALIDATORS.get(payload_type)
+    if validator is None:
+        return restored
+    return _ensure_compatible(restored, validator, payload_type)

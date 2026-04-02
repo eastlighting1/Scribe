@@ -39,7 +39,10 @@ def test_kafka_sink_publishes_record_payload_to_family_topic() -> None:
         call
         for call in producer.calls
         if call["topic"] == "observability.record"
-        and json.loads(bytes(call["value"]).decode("utf-8"))["payload"]["payload"]["event_key"] == "run.note"
+        and json.loads(bytes(call["value"]).decode("utf-8"))["payload"]["payload"][
+            "event_key"
+        ]
+        == "run.note"
     )
     assert bytes(matching_call["key"]).startswith(b"run:")
     payload = json.loads(bytes(matching_call["value"]).decode("utf-8"))

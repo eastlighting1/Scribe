@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from typing import Any
-import warnings
 
 from scribe.exceptions import PartialSinkFailureError
 from scribe.results import PayloadFamily

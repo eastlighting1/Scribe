@@ -28,7 +28,10 @@ def test_s3_object_sink_writes_record_payload_with_family_key_prefix() -> None:
         call
         for call in client.calls
         if "/record/" in str(call["Key"])
-        and json.loads(bytes(call["Body"]).decode("utf-8"))["payload"]["payload"]["event_key"] == "run.note"
+        and json.loads(bytes(call["Body"]).decode("utf-8"))["payload"]["payload"][
+            "event_key"
+        ]
+        == "run.note"
     )
     assert record_call["Bucket"] == "demo-bucket"
     assert str(record_call["Key"]).startswith("observability/record/")

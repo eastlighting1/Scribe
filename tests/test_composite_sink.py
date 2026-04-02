@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 import warnings
+from typing import Any
 
 from scribe import CompositeSink, PayloadFamily, Scribe
 from scribe.sinks import Sink

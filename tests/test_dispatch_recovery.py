@@ -90,7 +90,9 @@ def test_degradation_evidence_can_fall_back_to_outbox(tmp_path: Path) -> None:
     )
 
     with scribe.run("training") as run:
-        result = run.emit_events([EventEmission("run.note", "captured with degraded delivery")]).results[0]
+        result = run.emit_events(
+            [EventEmission("run.note", "captured with degraded delivery")]
+        ).results[0]
 
     assert result.status == DeliveryStatus.DEGRADED
     assert result.degradation_payload is not None

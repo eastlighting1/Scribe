@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from spine.api import (
+    METRIC_AGGREGATION_SCOPES,
     ArtifactManifest,
     EnvironmentSnapshot,
     ExtensionFieldSet,
-    METRIC_AGGREGATION_SCOPES,
     MetricPayload,
     MetricRecord,
     OperationContext,
