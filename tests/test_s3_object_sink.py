@@ -19,11 +19,14 @@ class FakeS3Client:
         self.calls: list[PutObjectCall] = []
 
     def put_object(self, **kwargs: str | bytes) -> None:
+        body = kwargs["Body"]
+        if not isinstance(body, bytes):
+            raise TypeError("Body must be bytes.")
         self.calls.append(
             PutObjectCall(
                 Bucket=str(kwargs["Bucket"]),
                 Key=str(kwargs["Key"]),
-                Body=bytes(kwargs["Body"]),
+                Body=body,
                 ContentType=str(kwargs["ContentType"]),
             )
         )
