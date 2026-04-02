@@ -19,7 +19,14 @@ class FakeS3Client:
         self.calls: list[PutObjectCall] = []
 
     def put_object(self, **kwargs: str | bytes) -> None:
-        self.calls.append(kwargs)
+        self.calls.append(
+            PutObjectCall(
+                Bucket=str(kwargs["Bucket"]),
+                Key=str(kwargs["Key"]),
+                Body=bytes(kwargs["Body"]),
+                ContentType=str(kwargs["ContentType"]),
+            )
+        )
 
 
 def test_s3_object_sink_writes_record_payload_with_family_key_prefix() -> None:
