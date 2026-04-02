@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from pytest import CaptureFixture
+
 from scribe import Scribe
 from scribe.config import ScribeConfig
 from scribe.replay.cli import main
@@ -18,7 +20,10 @@ class AlwaysFailSink(Sink):
         raise RuntimeError("still failing")
 
 
-def test_replay_cli_replays_local_jsonl_target(tmp_path: Path, capsys) -> None:
+def test_replay_cli_replays_local_jsonl_target(
+    tmp_path: Path,
+    capsys: CaptureFixture[str],
+) -> None:
     outbox_root = tmp_path / "outbox"
     storage_root = tmp_path / "store"
     scribe = Scribe(
@@ -48,5 +53,5 @@ def test_replay_cli_replays_local_jsonl_target(tmp_path: Path, capsys) -> None:
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "replayed=" in captured.out
-    assert "skipped=0" in captured.out
+    assert "omitted=0" in captured.out
     assert (storage_root / "records.jsonl").exists()

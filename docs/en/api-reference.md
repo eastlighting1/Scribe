@@ -827,7 +827,7 @@ Properties:
 - `total_count`
 - `success_count`
 - `failure_count`
-- `skipped_total`
+- `omitted_count`
 
 ### CLI
 

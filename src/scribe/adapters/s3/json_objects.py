@@ -57,7 +57,7 @@ class S3ObjectSink(Sink):
         self.supported_families = frozenset(PayloadFamily)
         if client is None:
             try:
-                import boto3
+                import boto3  # type: ignore[import-not-found]
             except ImportError as exc:  # pragma: no cover
                 raise RuntimeError(
                     "boto3 is required when no S3 client is supplied."

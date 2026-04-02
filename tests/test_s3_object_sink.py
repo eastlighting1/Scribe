@@ -2,15 +2,23 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import TypedDict
 
 from scribe import PayloadFamily, S3ObjectSink, Scribe
 
 
+class PutObjectCall(TypedDict):
+    Bucket: str
+    Key: str
+    Body: bytes
+    ContentType: str
+
+
 class FakeS3Client:
     def __init__(self) -> None:
-        self.calls: list[dict[str, object]] = []
+        self.calls: list[PutObjectCall] = []
 
-    def put_object(self, **kwargs: object) -> None:
+    def put_object(self, **kwargs: str | bytes) -> None:
         self.calls.append(kwargs)
 
 
@@ -28,14 +36,12 @@ def test_s3_object_sink_writes_record_payload_with_family_key_prefix() -> None:
         call
         for call in client.calls
         if "/record/" in str(call["Key"])
-        and json.loads(bytes(call["Body"]).decode("utf-8"))["payload"]["payload"][
-            "event_key"
-        ]
+        and json.loads(call["Body"].decode("utf-8"))["payload"]["payload"]["event_key"]
         == "run.note"
     )
     assert record_call["Bucket"] == "demo-bucket"
     assert str(record_call["Key"]).startswith("observability/record/")
-    body = json.loads(bytes(record_call["Body"]).decode("utf-8"))
+    body = json.loads(record_call["Body"].decode("utf-8"))
     assert body["family"] == "record"
     assert body["payload"]["payload"]["event_key"] == "run.note"
 
@@ -53,6 +59,6 @@ def test_s3_object_sink_uses_artifact_ref_in_object_key(tmp_path: Path) -> None:
     assert result.status.value == "success"
     artifact_call = next(call for call in client.calls if "/artifact/" in str(call["Key"]))
     assert "artifact_artifact.model" in str(artifact_call["Key"])
-    body = json.loads(bytes(artifact_call["Body"]).decode("utf-8"))
+    body = json.loads(artifact_call["Body"].decode("utf-8"))
     assert body["family"] == PayloadFamily.ARTIFACT.value
     assert body["payload"]["manifest"]["artifact_ref"] == "artifact:artifact.model"

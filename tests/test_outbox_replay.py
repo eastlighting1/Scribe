@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from scribe import DeliveryStatus, Scribe, replay_outbox
@@ -29,7 +30,9 @@ class RecordingSink(Sink):
         self.actions.append((family, payload))
 
 
-def test_replay_outbox_replays_pending_entries_and_acknowledges_success(tmp_path) -> None:
+def test_replay_outbox_replays_pending_entries_and_acknowledges_success(
+    tmp_path: Path,
+) -> None:
     outbox_root = tmp_path / "outbox"
     scribe = Scribe(
         project_name="demo-project",
@@ -54,7 +57,7 @@ def test_replay_outbox_replays_pending_entries_and_acknowledges_success(tmp_path
     assert outbox.read_pending_entries() == []
 
 
-def test_replay_outbox_leaves_failed_entries_pending(tmp_path) -> None:
+def test_replay_outbox_leaves_failed_entries_pending(tmp_path: Path) -> None:
     outbox_root = tmp_path / "outbox"
     scribe = Scribe(
         project_name="demo-project",
@@ -68,13 +71,13 @@ def test_replay_outbox_leaves_failed_entries_pending(tmp_path) -> None:
     replay_result = replay_outbox(outbox_root=str(outbox_root), sinks=[AlwaysFailSink()])
 
     assert replay_result.failure_count >= 1
-    assert replay_result.skipped_total == 0
+    assert replay_result.omitted_count == 0
     assert any(result.status == DeliveryStatus.FAILURE for result in replay_result.results)
     outbox = LocalOutbox(outbox_root)
     assert len(outbox.read_pending_entries()) >= 1
 
 
-def test_replay_outbox_dead_letters_entries_after_threshold(tmp_path) -> None:
+def test_replay_outbox_dead_letters_entries_after_threshold(tmp_path: Path) -> None:
     outbox_root = tmp_path / "outbox"
     scribe = Scribe(
         project_name="demo-project",

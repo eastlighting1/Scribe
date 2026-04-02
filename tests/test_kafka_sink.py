@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import TypedDict
 
 from scribe import KafkaSink, PayloadFamily, Scribe
 
@@ -14,9 +15,16 @@ class FakeFuture:
         self.timeout = timeout
 
 
+class ProducerCall(TypedDict):
+    topic: str
+    key: bytes
+    value: bytes
+    future: FakeFuture
+
+
 class FakeProducer:
     def __init__(self) -> None:
-        self.calls: list[dict[str, object]] = []
+        self.calls: list[ProducerCall] = []
         self.futures: list[FakeFuture] = []
 
     def send(self, topic: str, *, key: bytes, value: bytes) -> FakeFuture:
@@ -39,13 +47,11 @@ def test_kafka_sink_publishes_record_payload_to_family_topic() -> None:
         call
         for call in producer.calls
         if call["topic"] == "observability.record"
-        and json.loads(bytes(call["value"]).decode("utf-8"))["payload"]["payload"][
-            "event_key"
-        ]
+        and json.loads(call["value"].decode("utf-8"))["payload"]["payload"]["event_key"]
         == "run.note"
     )
-    assert bytes(matching_call["key"]).startswith(b"run:")
-    payload = json.loads(bytes(matching_call["value"]).decode("utf-8"))
+    assert matching_call["key"].startswith(b"run:")
+    payload = json.loads(matching_call["value"].decode("utf-8"))
     assert payload["family"] == PayloadFamily.RECORD.value
     assert matching_call["future"].timeout == 3.0
 
@@ -62,7 +68,7 @@ def test_kafka_sink_uses_artifact_ref_as_message_key(tmp_path: Path) -> None:
 
     assert result.status.value == "success"
     artifact_call = next(call for call in producer.calls if call["topic"] == "scribe.artifact")
-    assert bytes(artifact_call["key"]) == b"artifact:artifact.model"
-    payload = json.loads(bytes(artifact_call["value"]).decode("utf-8"))
+    assert artifact_call["key"] == b"artifact:artifact.model"
+    payload = json.loads(artifact_call["value"].decode("utf-8"))
     assert payload["family"] == PayloadFamily.ARTIFACT.value
     assert payload["payload"]["manifest"]["artifact_ref"] == "artifact:artifact.model"

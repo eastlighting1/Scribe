@@ -65,7 +65,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(
         f"replayed={result.total_count} "
         f"succeeded={result.success_count} "
-        f"skipped={result.skipped_total} "
+        f"omitted={result.omitted_count} "
         f"failed={result.failure_count}"
     )
     return 0 if result.failure_count == 0 else 1

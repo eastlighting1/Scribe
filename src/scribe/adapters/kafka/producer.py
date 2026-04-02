@@ -50,7 +50,7 @@ class KafkaSink(Sink):
         self.supported_families = frozenset(PayloadFamily)
         if producer is None:
             try:
-                from kafka import KafkaProducer
+                from kafka import KafkaProducer  # type: ignore[import-not-found]
             except ImportError as exc:  # pragma: no cover
                 raise RuntimeError(
                     "kafka-python is required when no producer is supplied."
