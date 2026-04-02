@@ -182,6 +182,10 @@ Result model:
 
 이렇게 하면 local JSONL을 아키텍처 전체의 source of truth로 만들지 않으면서도, 팀은 offline-capable한 기본 경로를 가질 수 있습니다. 이것은 단지 Scribe의 vendor-agnostic sink boundary 뒤에 있는 하나의 구체적인 adapter일 뿐입니다.
 
+현재 built-in sink surface는 `LocalJsonlSink`, `InMemorySink`, `S3ObjectSink`, `KafkaSink`, `CompositeSink`를 포함합니다. 이 중 `CompositeSink`는 호환성 경로이고, 새 통합에서는 `Scribe(..., sinks=[...])` 형태의 top-level fan-out을 권장합니다.
+
+또한 sink 실시간 전달이 실패해도 `ScribeConfig(outbox_root=...)`가 설정되어 있으면 payload를 durable outbox에 남길 수 있습니다. 이후 `replay_outbox(...)`나 `scribe-replay-outbox` CLI로 재전송할 수 있고, 반복 실패 항목은 dead-letter로 승격할 수 있습니다.
+
 ## 문서
 
 Scribe의 runtime model, capture pattern, sink 동작, API를 더 깊게 보려면 아래 문서를 읽어보세요:

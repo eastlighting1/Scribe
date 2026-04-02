@@ -19,6 +19,7 @@ from scribe import (
     SinkDispatchError,
     ValidationError,
 )
+from scribe.config import ScribeConfig
 from scribe.sinks import Sink
 from scribe.spine_bridge import (
     ArtifactManifest,
@@ -39,6 +40,21 @@ class FailingSink(Sink):
 
     def capture(self, *, family: PayloadFamily, payload: Any) -> None:
         raise RuntimeError(f"cannot store {family}")
+
+
+class SucceedsForRecordFailsForDegradation(Sink):
+    """Succeeds for all families except DEGRADATION — isolates degradation-dispatch failure."""
+
+    name = "rec-ok-deg-fail"
+    supported_families = frozenset(PayloadFamily)
+
+    def __init__(self) -> None:
+        self.actions: list[tuple[PayloadFamily, Any]] = []
+
+    def capture(self, *, family: PayloadFamily, payload: Any) -> None:
+        if family == PayloadFamily.DEGRADATION:
+            raise RuntimeError("degradation capture rejected by this sink")
+        self.actions.append((family, payload))
 
 
 class RecordOnlySink(Sink):
@@ -567,6 +583,28 @@ def test_stage_and_operation_metadata_are_preserved_in_extensions() -> None:
     assert operation_extensions["scribe.capture.metadata"] == {"batch_size": 32}
 
 
+def test_stage_close_preserves_stage_metadata_in_terminal_context_payload() -> None:
+    sink = InMemorySink()
+    scribe = Scribe(project_name="demo-project", sinks=[sink])
+
+    with scribe.run("training") as run:
+        with run.stage("train", metadata={"dataset": "imagenet"}):
+            pass
+
+    stage_payloads = [
+        payload
+        for family, payload in sink.actions
+        if family == PayloadFamily.CONTEXT and isinstance(payload, StageExecution)
+    ]
+    assert len(stage_payloads) == 2
+    terminal_stage = stage_payloads[-1]
+    extensions = {
+        extension.namespace: extension.fields for extension in terminal_stage.extensions
+    }
+    assert terminal_stage.status == "completed"
+    assert extensions["scribe.capture.metadata"] == {"dataset": "imagenet"}
+
+
 def test_event_tags_are_preserved_in_record_envelope_extensions() -> None:
     sink = InMemorySink()
     scribe = Scribe(project_name="demo-project", sinks=[sink])
@@ -614,6 +652,75 @@ def test_invalid_metric_aggregation_scope_is_rejected() -> None:
     with scribe.run("training") as run:
         with pytest.raises(ValidationError):
             run.metric("training.loss", 0.42, aggregation_scope="nonsense")
+
+
+def test_schema_version_config_override_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        ScribeConfig(schema_version="2.0.0")
+
+
+# --- Sink failure recovery ---
+
+
+def test_no_sinks_configured_results_in_degraded_capture() -> None:
+    scribe = Scribe(project_name="demo-project", sinks=[])
+
+    with scribe.run("training") as run:
+        result = run.event("run.note", message="captured without sinks")
+
+    assert result.status == DeliveryStatus.DEGRADED
+    assert any("no_sinks_configured" in reason for reason in result.degradation_reasons)
+
+
+def test_no_sinks_configured_batch_emit_reports_all_as_degraded() -> None:
+    scribe = Scribe(project_name="demo-project", sinks=[])
+
+    with scribe.run("training") as run:
+        result = run.emit_events(
+            [
+                EventEmission("batch.first", "first event"),
+                EventEmission("batch.second", "second event"),
+            ]
+        )
+
+    assert result.status == DeliveryStatus.DEGRADED
+    assert result.total_count == 2
+    assert result.degraded_count == 2
+    assert result.success_count == 0
+
+
+def test_degradation_dispatch_failure_is_silently_swallowed() -> None:
+    # Primary dispatch: one sink succeeds, FailingSink fails → DEGRADED (not FAILURE).
+    # Degradation dispatch: SucceedsForRecordFailsForDegradation rejects DEGRADATION,
+    # FailingSink always fails → all sinks fail → SinkDispatchError raised internally
+    # but caught and swallowed. result.degradation_emitted stays False.
+    sink = SucceedsForRecordFailsForDegradation()
+    scribe = Scribe(project_name="demo-project", sinks=[sink, FailingSink()])
+
+    with scribe.run("training") as run:
+        result = run.event("run.note", message="degradation dispatch will fail silently")
+
+    assert result.status == DeliveryStatus.DEGRADED
+    assert result.degradation_emitted is False
+    assert any(reason.startswith("sink_failure:failing") for reason in result.degradation_reasons)
+
+
+def test_partial_sink_failure_for_context_dispatch_does_not_abort_lifecycle() -> None:
+    # Context dispatches should degrade gracefully; lifecycle should complete without exception.
+    memory = InMemorySink()
+    scribe = Scribe(project_name="demo-project", sinks=[memory, FailingSink()])
+
+    completed = False
+    with scribe.run("training") as run:
+        with run.stage("train") as stage:
+            stage.metric("training.loss", 0.1, aggregation_scope="step")
+        completed = True
+
+    assert completed
+    assert any(isinstance(p, StructuredEventRecord) for _, p in memory.actions)
+
+
+# --- Existing test preserved ---
 
 
 def test_span_allows_explicit_parent_and_context_linked_refs() -> None:

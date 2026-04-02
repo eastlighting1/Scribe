@@ -47,6 +47,8 @@ class CaptureResult:
     payload: Any | None = None
     degradation_emitted: bool = False
     degradation_payload: Any | None = None
+    recovered_to_outbox: bool = False
+    replay_refs: list[str] = field(default_factory=list)
 
     @property
     def succeeded(self) -> bool:

@@ -179,6 +179,8 @@ The built-in sink set exposed at the public package boundary is:
 - `LocalJsonlSink`
 - `InMemorySink`
 - `CompositeSink`
+- `S3ObjectSink`
+- `KafkaSink`
 
 These are not redundant with one another. They serve different usage situations.
 
@@ -277,6 +279,8 @@ Examples of good fit:
 
 `CompositeSink` exists for a different reason again.
 
+However, it is now considered a compatibility path rather than the preferred setup.
+
 Its implementation lives in
 [`sinks/composite.py`](../../src/scribe/sinks/composite.py).
 
@@ -292,7 +296,41 @@ Examples:
 - share one logical sink object across setup code while still reaching many targets.
 
 Operationally, it is helpful to remember that `CompositeSink` does not remove the need to think
-about downstream child failures. It only groups the fan-out behavior.
+about downstream child failures. It only groups the fan-out behavior, and new integrations should
+prefer passing multiple sinks directly to `Scribe(..., sinks=[...])`.
+
+## `S3ObjectSink`
+
+`S3ObjectSink` writes each payload as a standalone JSON object under a family/date-based key path.
+
+This is a good fit when you want:
+
+- object-store durability,
+- family-partitioned payload layout,
+- a remote sink that works naturally with replay and idempotent object naming.
+
+## `KafkaSink`
+
+`KafkaSink` publishes payloads to Kafka topics grouped by payload family.
+
+This is a good fit when you want:
+
+- streaming delivery,
+- downstream consumers by family,
+- broker acknowledgements at the sink boundary.
+
+## Outbox, Replay, And Dead Letters
+
+When configured with `ScribeConfig(outbox_root=...)`, failed sink deliveries can be written to a
+durable local outbox instead of disappearing after a degraded result.
+
+That recovery surface now includes:
+
+- retry attempts at dispatch time,
+- durable outbox persistence for failed deliveries,
+- `replay_outbox(...)` for programmatic replay,
+- `scribe-replay-outbox` for CLI-driven replay,
+- dead-letter promotion for replay entries that continue failing beyond a configured threshold.
 
 ## What Happens When A Sink Does Not Support A Family
 

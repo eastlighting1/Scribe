@@ -257,7 +257,7 @@ Returns:
 
 ### `scribe.Scribe.metric`
 
-`Scribe.metric(key, value, *, unit=None, aggregation_scope="point", tags=None, summary_basis="raw_observation")`
+`Scribe.metric(key, value, *, unit=None, aggregation_scope="step", tags=None, summary_basis="raw_observation")`
 
 이 method는 현재 active context에 구조화된 metric을 emit합니다.
 
@@ -494,7 +494,7 @@ signature도 top-level session method와 같습니다:
 
 - `event(key, *, message, level="info", attributes=None, tags=None)`
 - `emit_events(emissions)`
-- `metric(key, value, *, unit=None, aggregation_scope="point", tags=None, summary_basis="raw_observation")`
+- `metric(key, value, *, unit=None, aggregation_scope="step", tags=None, summary_basis="raw_observation")`
 - `emit_metrics(emissions)`
 - `span(name, *, started_at=None, ended_at=None, status="ok", span_kind="operation", attributes=None, linked_refs=None, parent_span_id=None)`
 - `register_artifact(artifact_kind, path, *, artifact_ref=None, attributes=None, compute_hash=True, allow_missing=False)`
@@ -512,7 +512,7 @@ runtime configuration model은
 
 ### `scribe.config.ScribeConfig`
 
-`ScribeConfig(producer_ref="sdk.python.local", schema_version="1.0.0", capture_environment=True, capture_installed_packages=True, environment_variable_allowlist=())`
+`ScribeConfig(producer_ref="sdk.python.local", schema_version="1.0.0", capture_environment=True, capture_installed_packages=True, environment_variable_allowlist=(), retry_attempts=0, retry_backoff_seconds=0.0, outbox_root=None)`
 
 이 dataclass는 session 전체에 적용되는 runtime behavior를 설정합니다. 대부분의 사용자는
 초반에는 override할 필요가 없지만, environment capture를 제어하거나 custom producer
@@ -521,10 +521,13 @@ identity를 payload에 찍고 싶을 때 중요해집니다.
 Parameters:
 
 - `producer_ref`: emitted payload에 붙는 producer identity
-- `schema_version`: schema version marker
+- `schema_version`: 현재 `"1.0.0"`으로 고정된 schema version marker
 - `capture_environment`: run 시작 시 environment context를 캡처할지 여부
 - `capture_installed_packages`: installed package를 environment capture에 포함할지 여부
 - `environment_variable_allowlist`: snapshot에 허용할 environment variable name
+- `retry_attempts`: sink dispatch 실패 시 재시도 횟수
+- `retry_backoff_seconds`: 재시도 사이의 기본 backoff 초 단위 값
+- `outbox_root`: 실시간 전달 실패 payload를 durable하게 보존할 로컬 outbox 경로
 
 Example:
 
@@ -575,7 +578,7 @@ EventEmission(
 
 ### `scribe.MetricEmission`
 
-`MetricEmission(key, value, unit=None, aggregation_scope="point", tags={}, summary_basis="raw_observation")`
+`MetricEmission(key, value, unit=None, aggregation_scope="step", tags={}, summary_basis="raw_observation")`
 
 이 model은 `emit_metrics(...)`의 structured input입니다.
 
@@ -662,7 +665,7 @@ Fields:
 
 ### `scribe.CaptureResult`
 
-`CaptureResult(family, status, deliveries=[], warnings=[], degradation_reasons=[], payload=None, degradation_emitted=False, degradation_payload=None)`
+`CaptureResult(family, status, deliveries=[], warnings=[], degradation_reasons=[], payload=None, degradation_emitted=False, degradation_payload=None, recovered_to_outbox=False, replay_refs=[])`
 
 이것은 하나의 capture action에 대한 구조화된 outcome입니다.
 
@@ -676,6 +679,8 @@ Important fields:
 - `payload`: 있을 경우 emit된 payload
 - `degradation_emitted`: degradation payload도 emit되었는지 여부
 - `degradation_payload`: 있을 경우 emit된 degradation payload
+- `recovered_to_outbox`: 실시간 전달 실패 뒤 durable outbox 보존으로 복구되었는지 여부
+- `replay_refs`: outbox replay나 추적에 사용할 delivery reference
 
 Important properties:
 
@@ -870,6 +875,32 @@ Returns:
 
 - `InMemorySink`
 
+### `scribe.S3ObjectSink`
+
+`S3ObjectSink(client, bucket, *, prefix="scribe", name="s3-object")`
+
+이 sink는 payload를 object-by-object 방식으로 S3에 기록합니다. append형 JSONL이 아니라 family/date/ref 기반 object key를 사용하므로, 원격 object storage와 더 잘 맞습니다.
+
+Important parameters:
+
+- `client`
+- `bucket`
+- `prefix`
+- `name`
+
+### `scribe.KafkaSink`
+
+`KafkaSink(producer, *, topics=None, timeout_seconds=5.0, name="kafka")`
+
+이 sink는 family별 topic으로 payload를 전송하고, producer ack를 동기적으로 확인합니다. delivery 실패는 dispatch retry나 outbox recovery와 자연스럽게 연결됩니다.
+
+Important parameters:
+
+- `producer`
+- `topics`
+- `timeout_seconds`
+- `name`
+
 ### `scribe.CompositeSink`
 
 `CompositeSink(sinks, *, name="composite")`
@@ -884,6 +915,8 @@ Parameters:
 Returns:
 
 - `CompositeSink`
+
+이 sink는 계속 제공되지만, 새 통합에서는 top-level `Scribe(..., sinks=[...])` fan-out이 더 권장됩니다. child sink 일부만 실패하는 상황을 더 직접적으로 해석할 수 있기 때문입니다.
 
 dispatch, family support, local persistence layout 같은 운영 detail은
 [싱크와 저장소](sinks-and-storage.md)를 함께

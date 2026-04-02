@@ -8,8 +8,12 @@ on:
 jobs:
   lint-type-test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
     env:
-      UV_PYTHON: "3.11"
+      UV_PYTHON: ${{ matrix.python-version }}
 
     steps:
       - name: Check out Scribe
@@ -30,25 +34,25 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
       - name: Sync dependencies
-        run: uv sync --python 3.11 --extra dev
+        run: uv sync --python ${{ matrix.python-version }} --extra dev
 
       - name: Ruff
-        run: uv run --python 3.11 ruff check .
+        run: uv run --python ${{ matrix.python-version }} ruff check .
 
       - name: Mypy
-        run: uv run --python 3.11 mypy src tests
+        run: uv run --python ${{ matrix.python-version }} mypy src tests
 
       - name: Pytest
-        run: uv run --python 3.11 pytest tests
+        run: uv run --python ${{ matrix.python-version }} pytest tests
 
       - name: Run training example
-        run: uv run --python 3.11 python examples/training_workflow.py
+        run: uv run --python ${{ matrix.python-version }} python examples/training_workflow.py
 
       - name: Run evaluation example
-        run: uv run --python 3.11 python examples/evaluation_workflow.py
+        run: uv run --python ${{ matrix.python-version }} python examples/evaluation_workflow.py
 
       - name: Run artifact binding example
-        run: uv run --python 3.11 python examples/artifact_binding_workflow.py
+        run: uv run --python ${{ matrix.python-version }} python examples/artifact_binding_workflow.py

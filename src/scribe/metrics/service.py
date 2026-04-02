@@ -22,7 +22,7 @@ def emit_metric(
     key: str,
     value: int | float,
     unit: str | None = None,
-    aggregation_scope: str = "point",
+    aggregation_scope: str = "step",
     tags: Mapping[str, str] | None = None,
     summary_basis: str = "raw_observation",
 ) -> CaptureResult:

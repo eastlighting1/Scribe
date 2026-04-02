@@ -182,6 +182,15 @@ Result models:
 
 This gives teams an offline-capable default path without making local JSONL the architectural source of truth. It is simply one concrete adapter behind Scribe's vendor-agnostic sink boundary.
 
+The built-in sink and recovery surface now also includes:
+
+- `InMemorySink` for tests and object-level assertions
+- `S3ObjectSink` for object-store persistence by payload family
+- `KafkaSink` for topic-based streaming delivery
+- durable local outbox capture when configured through `ScribeConfig`
+- `replay_outbox(...)` and `scribe-replay-outbox` for replaying queued failures
+- dead-letter promotion for replay entries that keep failing beyond a configured threshold
+
 ## Documentation
 
 Dive deeper into Scribe's runtime model, capture patterns, sink behavior, and API:
@@ -217,3 +226,5 @@ This repository is still early-stage, but the core capture surface is already op
 - ✅ degraded capture evidence
 - ✅ local-first JSONL persistence
 - ✅ sink-based dispatch across payload families
+- ✅ durable outbox recovery and replay
+- ✅ built-in S3 and Kafka sink adapters

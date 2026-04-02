@@ -19,3 +19,7 @@ class ClosedScopeError(ContextError):
 
 class SinkDispatchError(ScribeError):
     """Raised when every sink fails for a dispatch."""
+
+
+class PartialSinkFailureError(ScribeError):
+    """Raised when a sink partially succeeds but some child deliveries fail."""

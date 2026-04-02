@@ -43,6 +43,9 @@ dependencies = [
   "spine>=0.1.0",
 ]
 
+[project.scripts]
+scribe-replay-outbox = "scribe.replay.cli:main"
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.3.0",

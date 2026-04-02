@@ -2,68 +2,20 @@
 
 [User Guide Home](../USER_GUIDE.en.md)
 
-This page is the reference companion to the rest of the Scribe guide. The other pages explain how
-to think about instrumentation, scope design, degraded capture, sinks, and artifact binding. This
-page exists for the moment when you already know what you want to do and simply need to confirm the
-public API surface.
+This page is a single reference document that collects the public API exposed through `import scribe`
+and its documented public submodules in one place.
 
-In practice, that usually means one of five questions. Which symbols are exposed from
-`import scribe`? Which symbols are exposed from public submodules such as `scribe.results` and
-`scribe.config`? Which methods live on the `Scribe` session object? Which methods live on scope
-objects? Which result, sink, and exception types are intended to be public? This reference is
-organized around those questions.
+## Package Entry Points
 
-If you are still deciding whether a piece of data should be modeled as an event, metric, span, or
-artifact, start with [Capture Patterns](capture-patterns.md).
-If you are trying to understand degraded outcomes or dispatch failures, read
-[Degradation and Errors](degradation-and-errors.md)
-alongside this page.
+The public import surface is defined by
+[src/scribe/__init__.py](../../src/scribe/__init__.py)
+and public submodule `__init__.py` files such as
+[src/scribe/config/__init__.py](../../src/scribe/config/__init__.py),
+[src/scribe/results/__init__.py](../../src/scribe/results/__init__.py),
+[src/scribe/artifacts/__init__.py](../../src/scribe/artifacts/__init__.py),
+and [src/scribe/sinks/__init__.py](../../src/scribe/sinks/__init__.py).
 
-## Package Entry Point
-
-The top-level package exports are collected in
-[src/scribe/__init__.py](../../src/scribe/__init__.py). Public
-submodule exports are collected in module-level `__init__.py` files such as
-[src/scribe/config/__init__.py](../../src/scribe/config/__init__.py)
-and [src/scribe/results/__init__.py](../../src/scribe/results/__init__.py).
-Together, those files are the best definition of what the library treats as its supported import
-surface.
-
-Most users start with a very small import set:
-
-```python
-from pathlib import Path
-
-from scribe import LocalJsonlSink, Scribe
-```
-
-When batch capture is needed, the common extension is:
-
-```python
-from scribe import EventEmission, MetricEmission, Scribe
-```
-
-When you need configuration, import it from the configuration module rather than the top-level
-package:
-
-```python
-from scribe import LocalJsonlSink, Scribe
-from scribe.config import ScribeConfig
-```
-
-The public surface naturally falls into seven groups:
-
-- the `Scribe` session object,
-- lifecycle scope objects returned by that session,
-- public submodule entry points,
-- batch input models,
-- result and status models,
-- artifact-related models,
-- sink and exception types.
-
-### Public Import Paths
-
-These are the public import entry points that appear to be intentionally supported by the package:
+Public import paths:
 
 - `scribe`
 - `scribe.api`
@@ -74,35 +26,28 @@ These are the public import entry points that appear to be intentionally support
 - `scribe.artifacts`
 - `scribe.sinks`
 
-Not every internal package under `src/scribe` is a public API module. For example, `runtime`,
-`context`, and `traces` exist as implementation packages, but they do not currently re-export a
-documented public symbol set through their `__init__.py` files.
+Not every internal package under `src/scribe` is a public API module. Packages such as `runtime`,
+`context`, and `traces` are implementation packages rather than documented import surfaces.
 
 ## Session API
-
-The main SDK entry point lives in
-[src/scribe/api/session.py](../../src/scribe/api/session.py).
-`Scribe` is the object you construct once for a project or process and then use to create
-run-scoped instrumentation.
-
-`Scribe` is publicly importable both as `from scribe import Scribe` and as
-`from scribe.api import Scribe`.
 
 ### `scribe.Scribe`
 
 `Scribe(project_name, *, sinks=None, config=None)`
 
-This is the top-level session object for local-first observability capture. It owns the runtime,
-the configured sink set, and the default capture configuration for the process or workflow in which
-it is used.
+Top-level SDK entry point for local-first observability capture.
 
 Parameters:
 
-- `project_name`: logical project name attached to the session and its emitted payloads
+- `project_name`: logical project name attached to emitted payloads
 - `sinks`: optional sequence of sink instances
-- `config`: optional [`ScribeConfig`](../../src/scribe/config/models.py)
+- `config`: optional `ScribeConfig`
 
-Typical usage:
+Returns:
+
+- `Scribe`
+
+Example:
 
 ```python
 from pathlib import Path
@@ -115,16 +60,17 @@ scribe = Scribe(
 )
 ```
 
-The important point is that constructing `Scribe` does not begin a run by itself. It creates an
-instrumentation session. A run begins only when you call `scribe.run(...)`.
+See also:
+
+- `scribe.Scribe.run`
+- `scribe.config.ScribeConfig`
+- `scribe.LocalJsonlSink`
 
 ### `scribe.Scribe.project_name`
 
 `Scribe.project_name`
 
-This property returns the configured project name for the session. It is mostly useful for
-inspection, tests, and places where you want to confirm the logical project identity that the
-runtime is attaching to emitted payloads.
+Configured project name for the session.
 
 Returns:
 
@@ -134,9 +80,7 @@ Returns:
 
 `Scribe.run(name, *, run_id=None, tags=None, metadata=None, code_revision=None, config_snapshot=None, dataset_ref=None)`
 
-This method creates a run scope. In practice, it is the method that opens the main instrumentation
-boundary for a training run, evaluation pass, batch scoring job, ingestion workflow, or similar
-unit of work.
+Create a run scope.
 
 Parameters:
 
@@ -144,9 +88,9 @@ Parameters:
 - `run_id`: optional explicit run reference
 - `tags`: optional run-level tags
 - `metadata`: optional run-level metadata
-- `code_revision`: optional reproducibility field for source revision identity
+- `code_revision`: optional source revision identifier
 - `config_snapshot`: optional structured configuration snapshot
-- `dataset_ref`: optional dataset reference for run provenance
+- `dataset_ref`: optional dataset reference
 
 Returns:
 
@@ -164,15 +108,16 @@ with scribe.run(
     ...
 ```
 
-The returned scope can be used as a context manager and is the normal starting point for stage and
-operation instrumentation.
+See also:
+
+- `scribe.RunScope`
+- `scribe.Scribe.current_run`
 
 ### `scribe.Scribe.current_run`
 
 `Scribe.current_run()`
 
-This method returns the current active run scope. It is useful when helper functions or framework
-callbacks need to emit data without receiving the scope object directly.
+Return the current active run scope.
 
 Returns:
 
@@ -180,13 +125,13 @@ Returns:
 
 Raises:
 
-- `ContextError`: when there is no active run scope in the current execution context
+- `ContextError`: raised when no active run scope is available
 
 ### `scribe.Scribe.current_stage`
 
 `Scribe.current_stage()`
 
-This method returns the current active stage scope.
+Return the current active stage scope.
 
 Returns:
 
@@ -194,13 +139,13 @@ Returns:
 
 Raises:
 
-- `ContextError`: when there is no active stage scope
+- `ContextError`: raised when no active stage scope is available
 
 ### `scribe.Scribe.current_operation`
 
 `Scribe.current_operation()`
 
-This method returns the current active operation scope.
+Return the current active operation scope.
 
 Returns:
 
@@ -208,63 +153,21 @@ Returns:
 
 Raises:
 
-- `ContextError`: when there is no active operation scope
+- `ContextError`: raised when no active operation scope is available
 
 ### `scribe.Scribe.event`
 
 `Scribe.event(key, *, message, level="info", attributes=None, tags=None)`
 
-This emits a structured event in the currently active context. It is the top-level convenience form
-of event capture and is most useful when a helper function already knows that the correct lifecycle
-scope is active.
+Emit a structured event in the active context.
 
 Parameters:
 
-- `key`: machine-readable event key
-- `message`: human-readable message
-- `level`: event severity level
-- `attributes`: optional structured event detail
-- `tags`: optional event tags
-
-Returns:
-
-- `CaptureResult`
-
-Raises:
-
-- `ContextError`: when no active lifecycle context is available
-- `ValidationError`: when the event payload is invalid
-- `SinkDispatchError`: when every eligible sink fails for the dispatch
-
-### `scribe.Scribe.emit_events`
-
-`Scribe.emit_events(emissions)`
-
-This emits multiple events in the current context. It is the batch form of `event(...)` and is
-useful when instrumentation already exists as a sequence of structured inputs.
-
-Parameters:
-
-- `emissions`: sequence of `EventEmission`
-
-Returns:
-
-- `BatchCaptureResult`
-
-### `scribe.Scribe.metric`
-
-`Scribe.metric(key, value, *, unit=None, aggregation_scope="point", tags=None, summary_basis="raw_observation")`
-
-This emits a structured metric in the currently active context.
-
-Parameters:
-
-- `key`: metric name
-- `value`: numeric value
-- `unit`: optional unit string
-- `aggregation_scope`: declared aggregation level for the metric value
-- `tags`: optional metric tags
-- `summary_basis`: optional description of how the value was summarized
+- `key`
+- `message`
+- `level`
+- `attributes`
+- `tags`
 
 Returns:
 
@@ -276,11 +179,60 @@ Raises:
 - `ValidationError`
 - `SinkDispatchError`
 
+See also:
+
+- `scribe.EventEmission`
+- `scribe.RunScope`
+
+### `scribe.Scribe.emit_events`
+
+`Scribe.emit_events(emissions)`
+
+Emit multiple structured events in the active context.
+
+Parameters:
+
+- `emissions`: sequence of `EventEmission`
+
+Returns:
+
+- `BatchCaptureResult`
+
+### `scribe.Scribe.metric`
+
+`Scribe.metric(key, value, *, unit=None, aggregation_scope="step", tags=None, summary_basis="raw_observation")`
+
+Emit a structured metric in the active context.
+
+Parameters:
+
+- `key`
+- `value`
+- `unit`
+- `aggregation_scope`
+- `tags`
+- `summary_basis`
+
+Returns:
+
+- `CaptureResult`
+
+Raises:
+
+- `ContextError`
+- `ValidationError`
+- `SinkDispatchError`
+
+See also:
+
+- `scribe.MetricEmission`
+- `scribe.BatchCaptureResult`
+
 ### `scribe.Scribe.emit_metrics`
 
 `Scribe.emit_metrics(emissions)`
 
-This emits multiple metrics in the current context.
+Emit multiple structured metrics in the active context.
 
 Parameters:
 
@@ -294,19 +246,18 @@ Returns:
 
 `Scribe.span(name, *, started_at=None, ended_at=None, status="ok", span_kind="operation", attributes=None, linked_refs=None, parent_span_id=None)`
 
-This emits a trace-like span record in the active context. Use it when the duration and status of a
-specific unit of work matter more than a single scalar measurement.
+Emit a trace-like span record in the active context.
 
 Parameters:
 
-- `name`: span name
-- `started_at`: optional explicit start timestamp
-- `ended_at`: optional explicit end timestamp
-- `status`: span status
-- `span_kind`: span category
-- `attributes`: optional structured span attributes
-- `linked_refs`: optional related references
-- `parent_span_id`: optional parent span identifier
+- `name`
+- `started_at`
+- `ended_at`
+- `status`
+- `span_kind`
+- `attributes`
+- `linked_refs`
+- `parent_span_id`
 
 Returns:
 
@@ -322,18 +273,16 @@ Raises:
 
 `Scribe.register_artifact(artifact_kind, path, *, artifact_ref=None, attributes=None, compute_hash=True, allow_missing=False)`
 
-This registers an artifact against the current lifecycle context. It is the top-level convenience
-form of artifact binding and is commonly used for checkpoints, predictions, evaluation reports, or
-other outputs that need durable identity rather than a plain event message.
+Register an artifact in the active context.
 
 Parameters:
 
-- `artifact_kind`: logical artifact category
-- `path`: artifact source path
-- `artifact_ref`: optional explicit artifact reference
-- `attributes`: optional artifact metadata
-- `compute_hash`: whether the runtime should compute a source hash when possible
-- `allow_missing`: whether a missing source should degrade instead of failing
+- `artifact_kind`
+- `path`
+- `artifact_ref`
+- `attributes`
+- `compute_hash`
+- `allow_missing`
 
 Returns:
 
@@ -345,30 +294,16 @@ Raises:
 - `ValidationError`
 - `SinkDispatchError`
 
-## Scope API
+## Scope Types
 
 The lifecycle scope types live in
 [src/scribe/runtime/scopes.py](../../src/scribe/runtime/scopes.py).
-In day-to-day usage, these scope objects are the API surface most developers work with directly,
-because they make the lifecycle boundary explicit and keep instrumentation colocated with the work
-being performed.
-
-All scope types share a few public identity fields:
-
-- `scope_kind`
-- `ref`
-- `name`
-
-They also share context-manager behavior. Entering a scope makes it active for nested work. Exiting
-the `with` block closes it automatically, using `"failed"` if the block exits with an exception and
-`"completed"` otherwise.
 
 ### `scribe.RunScope`
 
-`RunScope` is the top-level lifecycle scope returned by `Scribe.run(...)`. It represents the main
-unit of work for a workflow execution.
+Top-level lifecycle scope returned by `Scribe.run(...)`.
 
-Public fields commonly inspected in tests or debugging:
+Public fields:
 
 - `scope_kind`
 - `ref`
@@ -381,7 +316,7 @@ Public fields commonly inspected in tests or debugging:
 - `tags`
 - `metadata`
 
-Public methods:
+Methods:
 
 - `stage(name, *, stage_ref=None, metadata=None)`
 - `event(...)`
@@ -392,17 +327,22 @@ Public methods:
 - `register_artifact(...)`
 - `close(status="completed")`
 
-#### `scribe.RunScope.stage`
+See also:
+
+- `scribe.StageScope`
+- `scribe.Scribe.run`
+
+### `scribe.RunScope.stage`
 
 `RunScope.stage(name, *, stage_ref=None, metadata=None)`
 
-This creates a stage scope under the current run.
+Create a stage scope under the current run.
 
 Parameters:
 
-- `name`: stage name
-- `stage_ref`: optional explicit stage reference
-- `metadata`: optional stage metadata
+- `name`
+- `stage_ref`
+- `metadata`
 
 Returns:
 
@@ -410,15 +350,13 @@ Returns:
 
 Raises:
 
-- `ClosedScopeError`: when the run has already been closed
-- `ContextError`: when lifecycle state is inconsistent
+- `ClosedScopeError`
 
 ### `scribe.StageScope`
 
-`StageScope` represents a major phase inside a run, such as training, evaluation, preprocessing, or
-serving setup.
+Major phase inside a run, such as training or evaluation.
 
-Public fields commonly inspected in tests or debugging:
+Public fields:
 
 - `scope_kind`
 - `ref`
@@ -427,7 +365,7 @@ Public fields commonly inspected in tests or debugging:
 - `order_index`
 - `metadata`
 
-Public methods:
+Methods:
 
 - `operation(name, *, operation_ref=None, metadata=None)`
 - `event(...)`
@@ -438,17 +376,22 @@ Public methods:
 - `register_artifact(...)`
 - `close(status="completed")`
 
-#### `scribe.StageScope.operation`
+See also:
+
+- `scribe.OperationScope`
+- `scribe.RunScope`
+
+### `scribe.StageScope.operation`
 
 `StageScope.operation(name, *, operation_ref=None, metadata=None)`
 
-This creates an operation scope under the current stage.
+Create an operation scope under the current stage.
 
 Parameters:
 
-- `name`: operation name
-- `operation_ref`: optional explicit operation reference
-- `metadata`: optional operation metadata
+- `name`
+- `operation_ref`
+- `metadata`
 
 Returns:
 
@@ -457,14 +400,12 @@ Returns:
 Raises:
 
 - `ClosedScopeError`
-- `ContextError`
 
 ### `scribe.OperationScope`
 
-`OperationScope` is the fine-grained scope for a request, batch, iteration, or other small unit of
-observable work.
+Fine-grained scope for a request, batch, iteration, or other small unit of work.
 
-Public fields commonly inspected in tests or debugging:
+Public fields:
 
 - `scope_kind`
 - `ref`
@@ -473,7 +414,7 @@ Public fields commonly inspected in tests or debugging:
 - `observed_at`
 - `metadata`
 
-Public methods:
+Methods:
 
 - `event(...)`
 - `emit_events(...)`
@@ -483,44 +424,40 @@ Public methods:
 - `register_artifact(...)`
 - `close(status="completed")`
 
-### Shared Scope Capture Methods
+### Shared scope capture methods
 
-`RunScope`, `StageScope`, and `OperationScope` share the same capture-style methods, and the
-signatures match the top-level session methods:
+`RunScope`, `StageScope`, and `OperationScope` share these methods:
 
 - `event(key, *, message, level="info", attributes=None, tags=None)`
 - `emit_events(emissions)`
-- `metric(key, value, *, unit=None, aggregation_scope="point", tags=None, summary_basis="raw_observation")`
+- `metric(key, value, *, unit=None, aggregation_scope="step", tags=None, summary_basis="raw_observation")`
 - `emit_metrics(emissions)`
 - `span(name, *, started_at=None, ended_at=None, status="ok", span_kind="operation", attributes=None, linked_refs=None, parent_span_id=None)`
 - `register_artifact(artifact_kind, path, *, artifact_ref=None, attributes=None, compute_hash=True, allow_missing=False)`
 - `close(status="completed")`
 
-The difference is not in the payload shape. The difference is in how explicit the call site is. A
-scope method makes the lifecycle relationship visible at the point of capture, while a top-level
-session call relies on the currently active context.
-
 ## Configuration
-
-The runtime configuration model lives in
-[src/scribe/config/models.py](../../src/scribe/config/models.py)
-and is imported from `scribe.config`.
 
 ### `scribe.config.ScribeConfig`
 
-`ScribeConfig(producer_ref="sdk.python.local", schema_version="1.0.0", capture_environment=True, capture_installed_packages=True, environment_variable_allowlist=())`
+`ScribeConfig(producer_ref="sdk.python.local", schema_version="1.0.0", capture_environment=True, capture_installed_packages=True, environment_variable_allowlist=(), retry_attempts=0, retry_backoff_seconds=0.0, outbox_root=None)`
 
-This dataclass configures session-wide runtime behavior. Most users do not need to override it
-immediately, but it becomes important when you want to control environment capture or stamp a custom
-producer identity into emitted payloads.
+Session-wide runtime configuration dataclass.
 
 Parameters:
 
-- `producer_ref`: producer identity attached to emitted payloads
-- `schema_version`: schema version marker
-- `capture_environment`: whether environment context should be captured at run start
-- `capture_installed_packages`: whether installed packages should be included in environment capture
-- `environment_variable_allowlist`: environment variable names allowed into the snapshot
+- `producer_ref`
+- `schema_version`
+- `capture_environment`
+- `capture_installed_packages`
+- `environment_variable_allowlist`
+- `retry_attempts`
+- `retry_backoff_seconds`
+- `outbox_root`
+
+Returns:
+
+- `ScribeConfig`
 
 Example:
 
@@ -538,16 +475,17 @@ scribe = Scribe(
 )
 ```
 
-## Batch Input Models
+See also:
 
-The batch input models exist so that event and metric capture can be prepared ahead of time and then
-emitted in one call. They are small dataclasses rather than complex builders.
+- `scribe.Scribe`
+
+## Batch Input Models
 
 ### `scribe.EventEmission`
 
 `EventEmission(key, message, level="info", attributes={}, tags={})`
 
-This model is the structured input for `emit_events(...)`.
+Structured input for `emit_events(...)`.
 
 Fields:
 
@@ -569,11 +507,15 @@ EventEmission(
 )
 ```
 
+See also:
+
+- `scribe.Scribe.emit_events`
+
 ### `scribe.MetricEmission`
 
-`MetricEmission(key, value, unit=None, aggregation_scope="point", tags={}, summary_basis="raw_observation")`
+`MetricEmission(key, value, unit=None, aggregation_scope="step", tags={}, summary_basis="raw_observation")`
 
-This model is the structured input for `emit_metrics(...)`.
+Structured input for `emit_metrics(...)`.
 
 Fields:
 
@@ -597,22 +539,17 @@ MetricEmission(
 )
 ```
 
+See also:
+
+- `scribe.Scribe.emit_metrics`
+
 ## Result Models
-
-The result models live in
-[src/scribe/results/models.py](../../src/scribe/results/models.py).
-They are the main reason capture calls in Scribe feel different from plain logging calls. Instead of
-returning `None`, the SDK returns structured outcomes that explain what family was emitted, whether
-delivery succeeded, and whether any degradation occurred.
-
-These models are publicly importable from `scribe.results`. A subset is also re-exported from the
-top-level `scribe` package.
 
 ### `scribe.PayloadFamily`
 
 `PayloadFamily`
 
-This enum identifies the broad truth family being emitted by the SDK.
+Enum identifying the emitted payload family.
 
 Values:
 
@@ -625,7 +562,7 @@ Values:
 
 `DeliveryStatus`
 
-This enum normalizes the outcome of a capture or dispatch step.
+Enum identifying normalized delivery outcome.
 
 Values:
 
@@ -634,15 +571,11 @@ Values:
 - `DeliveryStatus.FAILURE`
 - `DeliveryStatus.SKIPPED`
 
-`SUCCESS` means the payload was accepted by at least one eligible sink without reduced fidelity.
-`DEGRADED` means some truth was preserved, but not in the ideal form. `FAILURE` means the capture
-did not succeed. `SKIPPED` is mainly relevant inside per-sink delivery details.
-
 ### `scribe.results.Delivery`
 
 `Delivery(sink_name, family, status, detail="")`
 
-This dataclass records the outcome for one sink during one dispatch attempt.
+Per-sink dispatch result item.
 
 Fields:
 
@@ -651,48 +584,48 @@ Fields:
 - `status`
 - `detail`
 
-`Delivery` is part of the public `scribe.results` module, even though it is not re-exported from the
-top-level `scribe` package. It matters whenever you inspect `CaptureResult.deliveries` in tests or
-operational tooling.
-
 ### `scribe.CaptureResult`
 
-`CaptureResult(family, status, deliveries=[], warnings=[], degradation_reasons=[], payload=None, degradation_emitted=False, degradation_payload=None)`
+`CaptureResult(family, status, deliveries=[], warnings=[], degradation_reasons=[], payload=None, degradation_emitted=False, degradation_payload=None, recovered_to_outbox=False, replay_refs=[])`
 
-This is the structured outcome for a single capture action.
+Structured outcome for a single capture action.
 
-Important fields:
+Fields:
 
-- `family`: the payload family that was being captured
-- `status`: the normalized overall outcome
-- `deliveries`: per-sink delivery entries
-- `warnings`: non-fatal warnings produced during capture
-- `degradation_reasons`: human-readable reasons for degraded capture
-- `payload`: the emitted payload, when available
-- `degradation_emitted`: whether a degradation payload was emitted
-- `degradation_payload`: the emitted degradation payload, when available
+- `family`
+- `status`
+- `deliveries`
+- `warnings`
+- `degradation_reasons`
+- `payload`
+- `degradation_emitted`
+- `degradation_payload`
+- `recovered_to_outbox`
+- `replay_refs`
 
-Important properties:
+Properties:
 
-- `succeeded`: `True` for successful and degraded outcomes
-- `degraded`: `True` only when the overall status is degraded
+- `succeeded`
+- `degraded`
 
-In practice, most application code only needs `status`, `succeeded`, `degraded`, and sometimes
-`degradation_reasons`. Tests and operational tooling often inspect `deliveries` as well.
+See also:
+
+- `scribe.BatchCaptureResult`
+- `scribe.results.Delivery`
 
 ### `scribe.BatchCaptureResult`
 
 `BatchCaptureResult(family, status, results=[])`
 
-This is the aggregated outcome for batch event or metric capture.
+Aggregated result for batch event or metric capture.
 
-Important fields:
+Fields:
 
 - `family`
 - `status`
 - `results`
 
-Important properties:
+Properties:
 
 - `total_count`
 - `success_count`
@@ -705,27 +638,13 @@ Class methods:
 
 - `BatchCaptureResult.from_results(family, results)`
 
-The overall batch status is normalized from the item-level results. A batch is fully successful only
-when every item succeeded. It is fully failed only when every item failed. Mixed outcomes produce a
-degraded batch result.
-
 ## Artifact Models
-
-The public artifact models live in
-[src/scribe/artifacts/models.py](../../src/scribe/artifacts/models.py).
-Most users do not instantiate all of them directly during normal instrumentation, because
-`register_artifact(...)` handles the common path. They are still part of the public surface because
-they define the binding model Scribe emits and they are useful in tests, extensions, and advanced
-inspection code.
-
-These models are publicly importable from both `scribe.artifacts` and, for convenience, the
-top-level `scribe` package.
 
 ### `scribe.ArtifactSourceKind`
 
 `ArtifactSourceKind`
 
-This enum describes how artifact bytes are currently located.
+Enum describing how artifact bytes are located.
 
 Values:
 
@@ -737,7 +656,7 @@ Values:
 
 `ArtifactBindingStatus`
 
-This enum describes the operational state of the artifact binding.
+Enum describing binding state.
 
 Values:
 
@@ -749,8 +668,7 @@ Values:
 
 `ArtifactSource(kind, uri, exists)`
 
-This frozen dataclass records where the runtime believes the artifact source is and whether that
-source currently exists.
+Artifact source location record.
 
 Fields:
 
@@ -762,8 +680,7 @@ Fields:
 
 `ArtifactVerificationPolicy(compute_hash=True, require_existing_source=True)`
 
-This frozen dataclass records the verification expectations that accompany an artifact registration
-request.
+Verification expectations for artifact registration.
 
 Fields:
 
@@ -774,8 +691,7 @@ Fields:
 
 `ArtifactRegistrationRequest(artifact_ref, artifact_kind, source, verification_policy, attributes={})`
 
-This frozen dataclass represents the registration intent before that intent is turned into a bound
-artifact payload.
+Artifact registration request model.
 
 Fields:
 
@@ -789,10 +705,9 @@ Fields:
 
 `ArtifactBinding(request, manifest, source, project_name, operation_context_ref, binding_status="bound", completeness_marker="complete", degradation_marker="none", attributes={})`
 
-This frozen dataclass is the artifact-family payload emitted by Scribe. It carries both the request
-that was made and the binding state that was actually achieved.
+Artifact-family payload emitted by Scribe.
 
-Important fields:
+Fields:
 
 - `request`
 - `manifest`
@@ -804,42 +719,32 @@ Important fields:
 - `degradation_marker`
 - `attributes`
 
-If you are trying to understand when these fields degrade, or why artifact binding is modeled
-separately from events, see
-[Artifacts](artifacts.md).
+See also:
+
+- [Artifacts](artifacts.md)
 
 ## Sink Types
-
-The built-in sinks are re-exported through
-[src/scribe/sinks/__init__.py](../../src/scribe/sinks/__init__.py).
-These are the delivery boundary between Scribe's structured runtime model and actual persistence or
-inspection.
-
-They are publicly importable from both `scribe.sinks` and the top-level `scribe` package.
 
 ### `scribe.Sink`
 
 `Sink`
 
-This is the abstract sink interface.
+Abstract sink interface.
 
-Important members:
+Members:
 
 - `name`
 - `supported_families`
 - `supports(family)`
 - `capture(family=..., payload=...)`
 
-Custom sinks should follow this contract.
-
 ### `scribe.LocalJsonlSink`
 
 `LocalJsonlSink(storage_root, *, name="local-jsonl")`
 
-This is the default persistence-oriented sink for local development and inspection. It writes one
-JSONL file per payload family under the configured storage root.
+Built-in sink that writes one JSONL file per payload family.
 
-Important methods:
+Methods:
 
 - `capture(...)`
 - `path_for(family)`
@@ -853,10 +758,9 @@ Returns:
 
 `InMemorySink(*, name="memory")`
 
-This is the simplest inspection sink. It stores capture actions in memory and is primarily useful in
-tests and lightweight runtime assertions.
+Built-in sink that stores capture actions in memory.
 
-Important fields:
+Fields:
 
 - `actions`
 
@@ -868,7 +772,10 @@ Returns:
 
 `CompositeSink(sinks, *, name="composite")`
 
-This sink forwards the same capture request to multiple child sinks.
+Sink that forwards capture requests to multiple child sinks.
+
+This type is deprecated in favor of passing multiple sinks directly to
+`Scribe(..., sinks=[...])`, which preserves per-sink delivery reporting.
 
 Parameters:
 
@@ -879,55 +786,88 @@ Returns:
 
 - `CompositeSink`
 
-For more operational detail about dispatch, family support, and local persistence layout, see
-[Sinks and Storage](sinks-and-storage.md).
+See also:
+
+- [Sinks and Storage](sinks-and-storage.md)
+
+### `scribe.S3ObjectSink`
+
+`S3ObjectSink(*, bucket, prefix="scribe", client=None, name="s3-object")`
+
+Built-in sink that writes each payload as a standalone JSON object in S3-compatible storage.
+
+### `scribe.KafkaSink`
+
+`KafkaSink(*, producer=None, topic_prefix="scribe", delivery_timeout_seconds=10.0, name="kafka")`
+
+Built-in sink that publishes payloads to Kafka topics grouped by payload family.
+
+## Replay API
+
+### `scribe.replay_outbox`
+
+`replay_outbox(*, outbox_root, sinks, sink_name=None, acknowledge_successes=True, dead_letter_after_failures=None)`
+
+Replay pending outbox entries to configured sinks.
+
+### `scribe.ReplayEntryResult`
+
+`ReplayEntryResult(replay_ref, family, target_sink, status, detail="")`
+
+Per-entry replay result.
+
+### `scribe.ReplayBatchResult`
+
+`ReplayBatchResult(results=[])`
+
+Aggregated replay result.
+
+Properties:
+
+- `total_count`
+- `success_count`
+- `failure_count`
+- `skipped_count`
+
+### CLI
+
+`scribe-replay-outbox`
+
+Command-line entry point for replaying durable outbox entries into `local-jsonl`, `s3`, or `kafka` sinks.
 
 ## Exceptions
-
-The public exception types live in
-[src/scribe/exceptions.py](../../src/scribe/exceptions.py). They
-divide Scribe failures into a small number of categories so that callers can distinguish invalid
-input, missing lifecycle state, closed scopes, and dispatch failure.
-
-These exceptions are re-exported from the top-level `scribe` package.
 
 ### `scribe.ScribeError`
 
 Base exception for the package.
 
+See also:
+
+- `scribe.ValidationError`
+- `scribe.ContextError`
+- `scribe.ClosedScopeError`
+- `scribe.SinkDispatchError`
+
 ### `scribe.ValidationError`
 
 Raised when invalid data is supplied to the SDK.
-
-Typical causes include invalid metric fields, unsupported aggregation scopes, invalid artifact
-inputs, and other payload-shape problems that should be fixed at the call site.
 
 ### `scribe.ContextError`
 
 Raised when lifecycle state is missing or inconsistent.
 
-Typical causes include attempting capture without an active run, calling `current_run()` when no run
-is active, or otherwise depending on lifecycle state that does not exist in the current execution
-context.
-
 ### `scribe.ClosedScopeError`
 
-Raised when a scope is used again after it has already been closed.
-
-This exception subclasses `ContextError`, which reflects the fact that it is still a lifecycle-state
-problem rather than a payload-validation problem.
+Raised when a scope is used after it has already been closed.
 
 ### `scribe.SinkDispatchError`
 
 Raised when every eligible sink fails for a dispatch.
 
-This is the exception to catch when capture logic is valid but delivery infrastructure has failed in
-a way that left no successful sink path.
-
 ## Related Files
 
 - Package exports: [src/scribe/__init__.py](../../src/scribe/__init__.py)
-- SDK session API: [src/scribe/api/session.py](../../src/scribe/api/session.py)
+- Session API: [src/scribe/api/session.py](../../src/scribe/api/session.py)
 - Scope types: [src/scribe/runtime/scopes.py](../../src/scribe/runtime/scopes.py)
 - Runtime config: [src/scribe/config/models.py](../../src/scribe/config/models.py)
 - Result models: [src/scribe/results/models.py](../../src/scribe/results/models.py)

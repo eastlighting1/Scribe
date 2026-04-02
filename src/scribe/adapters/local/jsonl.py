@@ -3,29 +3,13 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, is_dataclass
 from datetime import UTC, datetime
-from enum import Enum
 from pathlib import Path
 from typing import Any
 
 from scribe.results import PayloadFamily
+from scribe.serialization.json_ready import to_json_ready
 from scribe.sinks.base import Sink
-
-
-def _json_ready(value: Any) -> Any:
-    if is_dataclass(value):
-        serialized = asdict(value)  # type: ignore[arg-type]
-        return {key: _json_ready(inner) for key, inner in serialized.items()}
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, Path):
-        return str(value)
-    if isinstance(value, dict):
-        return {str(key): _json_ready(inner) for key, inner in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_json_ready(item) for item in value]
-    return value
 
 
 class LocalJsonlSink(Sink):
@@ -49,12 +33,17 @@ class LocalJsonlSink(Sink):
         entry = {
             "captured_at": datetime.now(tz=UTC).isoformat().replace("+00:00", "Z"),
             "family": family.value,
-            "payload": _json_ready(payload),
+            "payload": to_json_ready(payload),
         }
         target = self.storage_root / self._FILENAMES[family]
-        with target.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(entry, sort_keys=True))
-            handle.write("\n")
+        try:
+            with target.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(entry, sort_keys=True))
+                handle.write("\n")
+        except Exception as exc:
+            raise RuntimeError(
+                f"Failed to persist {family.value} payload to {target}"
+            ) from exc
 
     def path_for(self, family: PayloadFamily) -> Path:
         """Return the on-disk file path for a payload family."""

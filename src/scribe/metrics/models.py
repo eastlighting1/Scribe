@@ -13,6 +13,6 @@ class MetricEmission:
     key: str
     value: int | float
     unit: str | None = None
-    aggregation_scope: str = "point"
+    aggregation_scope: str = "step"
     tags: Mapping[str, str] = field(default_factory=dict)
     summary_basis: str = "raw_observation"

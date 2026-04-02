@@ -284,6 +284,20 @@ In that case:
 
 This makes unsupported-family behavior visible instead of silently dropping the payload.
 
+### 4. Real-Time Delivery Failed But The Outbox Preserved The Payload
+
+When `ScribeConfig(outbox_root=...)` is configured, a failed sink delivery can still be durably
+queued for replay.
+
+In that case, the result is still operationally degraded, but it is no longer equivalent to "the
+payload vanished." The caller can inspect:
+
+- `recovered_to_outbox`
+- `replay_refs`
+- and later replay or dead-letter handling
+
+to understand what happened after the real-time sink path failed.
+
 ## Capture-Logic Degradation
 
 Not all degradation comes from sinks.
@@ -422,6 +436,27 @@ So `SinkDispatchError` means:
 "capture reached the storage/forwarding boundary, but nothing eligible preserved it."
 
 That is very different from degraded capture, where at least some truth survived.
+
+One important refinement in the current implementation is that durable outbox preservation can turn
+an otherwise total real-time sink loss into a degraded result, because the payload still survived
+for later replay.
+
+## Replay And Dead-Letter Recovery
+
+Outbox-backed degradation is not the end of the story.
+
+The recovery path now includes:
+
+- `replay_outbox(...)` for programmatic replay,
+- `scribe-replay-outbox` for CLI replay,
+- typed payload restoration during replay,
+- dead-letter promotion for replay entries that repeatedly fail.
+
+This means degraded capture can now progress through several distinct operational states:
+
+- degraded but durably queued,
+- replayed successfully later,
+- or moved to a dead-letter log after repeated replay failure.
 
 ## A Useful Mental Model For Errors Versus Degradation
 

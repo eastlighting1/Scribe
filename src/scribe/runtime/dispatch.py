@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING, Any
 
-from scribe.exceptions import SinkDispatchError
+from scribe.adapters.local.outbox import LocalOutbox
+from scribe.exceptions import PartialSinkFailureError, SinkDispatchError
 from scribe.results import CaptureResult, Delivery, DeliveryStatus, PayloadFamily
 
 if TYPE_CHECKING:
@@ -70,6 +72,7 @@ def _dispatch(
     reasons = list(degradation_reasons or [])
     warning_messages = list(warnings or [])
     eligible_sink_count = 0
+    failed_captures: list[tuple[str, str, int]] = []
 
     for sink in runtime.sinks:
         if not sink.supports(family):
@@ -84,19 +87,53 @@ def _dispatch(
             continue
 
         eligible_sink_count += 1
-        try:
-            sink.capture(family=family, payload=payload)
-        except Exception as exc:
+        attempts = 0
+        last_exc: Exception | None = None
+        for attempt in range(1, runtime.config.retry_attempts + 2):
+            attempts = attempt
+            try:
+                sink.capture(family=family, payload=payload)
+            except PartialSinkFailureError as exc:
+                last_exc = None
+                deliveries.append(
+                    Delivery(
+                        sink_name=sink.name,
+                        family=family,
+                        status=DeliveryStatus.DEGRADED,
+                        detail=str(exc),
+                    )
+                )
+                reasons.append(f"sink_partial_failure:{sink.name}")
+                warning_messages.append(
+                    f"Sink `{sink.name}` partially failed during `{family}` capture: {exc}"
+                )
+                break
+            except Exception as exc:
+                last_exc = exc
+                if attempt <= runtime.config.retry_attempts and runtime.config.retry_backoff_seconds > 0:
+                    time.sleep(runtime.config.retry_backoff_seconds * (2 ** (attempt - 1)))
+            else:
+                last_exc = None
+                break
+
+        if deliveries and deliveries[-1].sink_name == sink.name and deliveries[-1].status == DeliveryStatus.DEGRADED:
+            continue
+
+        if last_exc is not None:
+            detail = f"attempts={attempts}; error={last_exc}"
             deliveries.append(
                 Delivery(
                     sink_name=sink.name,
                     family=family,
                     status=DeliveryStatus.FAILURE,
-                    detail=str(exc),
+                    detail=detail,
                 )
             )
             reasons.append(f"sink_failure:{sink.name}")
-            warning_messages.append(f"Sink `{sink.name}` failed during `{family}` capture: {exc}")
+            warning_messages.append(
+                f"Sink `{sink.name}` failed during `{family}` capture after {attempts} attempt(s): {last_exc}"
+            )
+            failed_captures.append((sink.name, str(last_exc), attempts))
         else:
             deliveries.append(
                 Delivery(
@@ -114,6 +151,34 @@ def _dispatch(
         warning_messages.append(f"No configured sink supports payload family `{family}`.")
 
     status = _final_status(deliveries, reasons)
+    replay_refs: list[str] = []
+    recovered_to_outbox = False
+    if failed_captures and runtime.config.outbox_root is not None:
+        outbox = LocalOutbox(runtime.config.outbox_root)
+        for sink_name, error, attempts in failed_captures:
+            try:
+                replay_ref = outbox.persist_failure(
+                    sink_name=sink_name,
+                    family=family,
+                    payload=payload,
+                    error=error,
+                    attempts=attempts,
+                )
+            except Exception as exc:
+                warning_messages.append(
+                    f"Failed to persist `{family}` payload for sink `{sink_name}` to the outbox: {exc}"
+                )
+            else:
+                recovered_to_outbox = True
+                replay_refs.append(replay_ref)
+                reasons.append(f"durably_queued_for_replay:{sink_name}")
+                warning_messages.append(
+                    f"Failed `{family}` payload for sink `{sink_name}` was queued to the outbox as `{replay_ref}`."
+                )
+
+    if status == DeliveryStatus.FAILURE and recovered_to_outbox:
+        status = DeliveryStatus.DEGRADED
+
     result = CaptureResult(
         family=family,
         status=status,
@@ -121,6 +186,8 @@ def _dispatch(
         warnings=warning_messages,
         degradation_reasons=reasons,
         payload=payload,
+        recovered_to_outbox=recovered_to_outbox,
+        replay_refs=replay_refs,
     )
 
     active_run_ref = runtime.resolve_context().run_ref
@@ -136,6 +203,7 @@ def _dispatch(
             warnings=warning_messages,
             observed_at=_observed_at_for(payload),
         )
+        result.degradation_payload = degradation_payload
         try:
             degradation_result = _dispatch(
                 runtime,
@@ -145,10 +213,16 @@ def _dispatch(
                 warnings=[],
             )
         except SinkDispatchError:
-            pass
+            result.warnings.append("Failed to dispatch degradation evidence to any sink.")
         else:
-            result.degradation_emitted = degradation_result.succeeded
-            result.degradation_payload = degradation_payload
+            result.degradation_emitted = any(
+                delivery.status == DeliveryStatus.SUCCESS
+                for delivery in degradation_result.deliveries
+            )
+            if degradation_result.recovered_to_outbox:
+                result.recovered_to_outbox = True
+                result.replay_refs.extend(degradation_result.replay_refs)
+                result.warnings.append("Degradation evidence was queued to the outbox for replay.")
 
     if status == DeliveryStatus.FAILURE:
         raise SinkDispatchError("All sinks failed to capture the payload.")

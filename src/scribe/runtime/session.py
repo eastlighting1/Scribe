@@ -177,6 +177,7 @@ class RuntimeSession:
             operation_scope=current_state.operation_scope,
         )
 
+        token = None
         if isinstance(scope, RunScope):
             scope.started_at = iso_utc_now()
             next_context.run_ref = scope.ref
@@ -186,37 +187,42 @@ class RuntimeSession:
             next_context.config_snapshot_ref = scope.config_snapshot_ref
             next_context.dataset_ref = scope.dataset_ref
             next_state.run_scope = scope
-            dispatch_context(self, self._project)
-            dispatch_context(
-                self,
-                build_run(
-                    project_name=self.project_name,
-                    run_ref=scope.ref,
-                    name=scope.name,
-                    status="running",
-                    started_at=scope.started_at,
-                    ended_at=None,
-                    code_revision=scope.code_revision,
-                    config_snapshot_ref=scope.config_snapshot_ref,
-                    dataset_ref=scope.dataset_ref,
-                    config_snapshot=scope.config_snapshot,
-                    tags=scope.tags,
-                    metadata=scope.metadata,
-                ),
-            )
-            if self.config.capture_environment:
+            token = self._state.set(next_state)
+            try:
+                dispatch_context(self, self._project)
                 dispatch_context(
                     self,
-                    build_environment_snapshot(
+                    build_run(
+                        project_name=self.project_name,
                         run_ref=scope.ref,
-                        captured_at=scope.started_at,
-                        capture_installed_packages=self.config.capture_installed_packages,
-                        environment_variable_allowlist=self.config.environment_variable_allowlist,
+                        name=scope.name,
+                        status="running",
+                        started_at=scope.started_at,
+                        ended_at=None,
                         code_revision=scope.code_revision,
                         config_snapshot_ref=scope.config_snapshot_ref,
                         dataset_ref=scope.dataset_ref,
+                        config_snapshot=scope.config_snapshot,
+                        tags=scope.tags,
+                        metadata=scope.metadata,
                     ),
                 )
+                if self.config.capture_environment:
+                    dispatch_context(
+                        self,
+                        build_environment_snapshot(
+                            run_ref=scope.ref,
+                            captured_at=scope.started_at,
+                            capture_installed_packages=self.config.capture_installed_packages,
+                            environment_variable_allowlist=self.config.environment_variable_allowlist,
+                            code_revision=scope.code_revision,
+                            config_snapshot_ref=scope.config_snapshot_ref,
+                            dataset_ref=scope.dataset_ref,
+                        ),
+                    )
+            except Exception:
+                self._state.reset(token)
+                raise
         elif isinstance(scope, StageScope):
             if next_context.run_ref is None:
                 raise ContextError("A stage requires an active run.")
@@ -227,19 +233,24 @@ class RuntimeSession:
             next_context.stage_name = scope.name
             next_state.stage_scope = scope
             next_state.operation_scope = None
-            dispatch_context(
-                self,
-                build_stage(
-                    run_ref=next_context.run_ref,
-                    stage_ref=scope.ref,
-                    stage_name=scope.name,
-                    status="running",
-                    started_at=scope.started_at,
-                    ended_at=None,
-                    order_index=scope.order_index,
-                    metadata=scope.metadata,
-                ),
-            )
+            token = self._state.set(next_state)
+            try:
+                dispatch_context(
+                    self,
+                    build_stage(
+                        run_ref=next_context.run_ref,
+                        stage_ref=scope.ref,
+                        stage_name=scope.name,
+                        status="running",
+                        started_at=scope.started_at,
+                        ended_at=None,
+                        order_index=scope.order_index,
+                        metadata=scope.metadata,
+                    ),
+                )
+            except Exception:
+                self._state.reset(token)
+                raise
         elif isinstance(scope, OperationScope):
             if next_context.run_ref is None:
                 raise ContextError("An operation requires an active run.")
@@ -247,19 +258,25 @@ class RuntimeSession:
             next_context.operation_context_ref = scope.ref
             next_context.operation_name = scope.name
             next_state.operation_scope = scope
-            dispatch_context(
-                self,
-                build_operation(
-                    run_ref=next_context.run_ref,
-                    stage_execution_ref=next_context.stage_execution_ref,
-                    operation_ref=scope.ref,
-                    operation_name=scope.name,
-                    observed_at=scope.observed_at,
-                    metadata=scope.metadata,
-                ),
-            )
+            token = self._state.set(next_state)
+            try:
+                dispatch_context(
+                    self,
+                    build_operation(
+                        run_ref=next_context.run_ref,
+                        stage_execution_ref=next_context.stage_execution_ref,
+                        operation_ref=scope.ref,
+                        operation_name=scope.name,
+                        observed_at=scope.observed_at,
+                        metadata=scope.metadata,
+                    ),
+                )
+            except Exception:
+                self._state.reset(token)
+                raise
 
-        token = self._state.set(next_state)
+        if token is None:
+            token = self._state.set(next_state)
         self._scope_tokens[id(scope)] = token
         self._emit_lifecycle_event(scope=scope, event="started", level="info")
 
@@ -291,6 +308,7 @@ class RuntimeSession:
                     started_at=scope.started_at,
                     ended_at=closed_at,
                     order_index=scope.order_index,
+                    metadata=scope.metadata,
                 ),
             )
         elif isinstance(scope, RunScope) and scope.started_at is not None:

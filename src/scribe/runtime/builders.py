@@ -14,6 +14,7 @@ from scribe.spine_bridge import (
     CorrelationRefs,
     EnvironmentSnapshot,
     ExtensionFieldSet,
+    METRIC_AGGREGATION_SCOPES,
     MetricPayload,
     MetricRecord,
     OperationContext,
@@ -43,9 +44,6 @@ if TYPE_CHECKING:
     from scribe.runtime.session import RuntimeSession
 
 
-_ALLOWED_AGGREGATION_SCOPES = frozenset(
-    {"point", "step", "batch", "epoch", "dataset", "run", "operation"}
-)
 _ALLOWED_COMPLETENESS_MARKERS = frozenset({"complete", "partial", "unknown"})
 _ALLOWED_DEGRADATION_MARKERS = frozenset(
     {"none", "partial_failure", "capture_gap", "compatibility_upgrade"}
@@ -285,7 +283,7 @@ def build_metric_record(
     summary_basis: str,
     observed_at: str,
 ) -> MetricRecord:
-    if aggregation_scope not in _ALLOWED_AGGREGATION_SCOPES:
+    if aggregation_scope not in METRIC_AGGREGATION_SCOPES:
         raise ValidationError(f"Unsupported aggregation_scope: {aggregation_scope}")
     value_type = "integer" if isinstance(value, int) else "float"
     record = MetricRecord(
